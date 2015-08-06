@@ -1,0 +1,7 @@
+let g:netrw_dirhistmax  =10
+let g:netrw_dirhist_cnt =5
+let g:netrw_dirhist_1='/Users/jhuggart/repos/daxko/services/progitron/src'
+let g:netrw_dirhist_2='/Users/jhuggart/repos/daxko/services/spot/src'
+let g:netrw_dirhist_3='/Users/jhuggart/repos/daxko/services/spot/src/api'
+let g:netrw_dirhist_4='/Users/jhuggart/repos/daxko/tools/servicestack_settings_resolver/src'
+let g:netrw_dirhist_5='/Users/jhuggart/repos/daxko/services/progitron/src'
