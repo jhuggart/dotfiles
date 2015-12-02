@@ -52,11 +52,8 @@ source $ZSH/oh-my-zsh.sh
 # User configuration
 
 export PATH="/usr/local/bin:${PATH}:/Users/jhuggart/.rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/local/git/bin:/Users/jhuggart/bin:/Applications/Postgres.app/Contents/Versions/9.3/bin:/Users/jhuggart/bin:/Applications/Postgres.app/Contents/Versions/9.3/bin:/Users/jhuggart/Library/Android/sdk/tools:/Users/jhuggart/Library/Android/sdk/platform-tools:Users/jhuggart/gradle-2.1.1/bin"
-# Docker config
-export DOCKER_CERT_PATH=/Users/jhuggart/.boot2docker/certs/boot2docker-vm
-export DOCKER_TLS_VERIFY=1
-export DOCKER_HOST=tcp://192.168.59.103:2376
 
+export ANDROID_HOME=/usr/local/opt/android-sdk
 # export MANPATH="/usr/local/man:$MANPATH"
 
 # You may need to manually set your language environment
@@ -87,6 +84,8 @@ alias pgs='phonegap serve'
 alias pra='phonegap run android'
 alias prad='phonegap run android --device'
 
+alias sd='docker-machine start default && eval "$(docker-machine env default)"'
+
 alias fuck='eval $(thefuck $(fc -ln -1 | tail -n 1)); fc -R'
 
 #teamocil autocomplete
@@ -104,3 +103,10 @@ alias vim="mvim -v"
 export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 [ -s "/Users/jhuggart/.kre/kvm/kvm.sh" ] && . "/Users/jhuggart/.kre/kvm/kvm.sh" # Load kvm
+
+#nvm
+export NVM_DIR=~/.nvm
+source $(brew --prefix nvm)/nvm.sh
+
+#set docker env vars
+#eval "$(docker-machine env default)"
