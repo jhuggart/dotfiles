@@ -1,4 +1,10 @@
 let g:netrw_dirhistmax  =10
-let g:netrw_dirhist_cnt =2
+let g:netrw_dirhist_cnt =8
 let g:netrw_dirhist_1='/Users/jhuggart/repos/daxko/services/progitron/src'
 let g:netrw_dirhist_2='/Users/jhuggart/repos/daxko/services/progitron/src/Dxp.Programs.Api'
+let g:netrw_dirhist_3='/Users/jhuggart/repos/daxko/services/mx-api/src'
+let g:netrw_dirhist_4='/Users/jhuggart/repos/daxko/mobile/reboot/src'
+let g:netrw_dirhist_5='/Users/jhuggart/repos/daxko/Well/well-pg/www'
+let g:netrw_dirhist_6='/Users/jhuggart/repos/daxko/Well/well-pg/www/js'
+let g:netrw_dirhist_7='/Users/jhuggart/repos/daxko/Well/well-pg/www/js/controllers'
+let g:netrw_dirhist_8='/Users/jhuggart/repos/daxko/Well/well-pg/www'
