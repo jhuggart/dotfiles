@@ -31,9 +31,10 @@ brew install zsh-syntax-highlighting
 brew install fzf
 brew install eza
 brew install nvm
+brew install ripgrep
 
 # Set up fzf key bindings
-$(brew --prefix)/opt/fzf/install --key-bindings --completion --no-bash --no-fish --no-update-rc -y
+yes | $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-bash --no-fish --no-update-rc
 
 # Install Nerd Font
 echo "Installing Nerd Font..."
@@ -74,6 +75,12 @@ mkdir -p ~/.config/ghostty
 backup_if_exists ~/.config/ghostty/config
 ln -s "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
 echo "  Linked ghostty/config"
+
+# neovim
+mkdir -p ~/.config
+backup_if_exists ~/.config/nvim
+ln -s "$DOTFILES_DIR/nvim" ~/.config/nvim
+echo "  Linked nvim"
 
 # ─────────────────────────────────────────────────────────────
 # Set zsh as default shell
