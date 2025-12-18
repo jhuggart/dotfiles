@@ -1,112 +1,75 @@
-# Path to your oh-my-zsh installation.
-export ZSH=$HOME/.oh-my-zsh
+export PATH="$HOME/.local/bin:$PATH"
 
-# Set name of the theme to load.
-# Look in ~/.oh-my-zsh/themes/
-# Optionally, if you set this to "random", it'll load a random theme each
-# time that oh-my-zsh is loaded.
-ZSH_THEME="gallifrey"
+alias vim="nvim"
+alias vi="nvim"
 
-# Uncomment the following line to use case-sensitive completion.
-# CASE_SENSITIVE="true"
+# nvm setup
+export NVM_DIR="$HOME/.nvm"
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
-# Uncomment the following line to disable bi-weekly auto-update checks.
-# DISABLE_AUTO_UPDATE="true"
+# git completion
+autoload -Uz compinit && compinit
 
-# Uncomment the following line to change how often to auto-update (in days).
-# export UPDATE_ZSH_DAYS=13
+# Git branch for prompt
+autoload -Uz vcs_info
+precmd() { vcs_info }
+zstyle ':vcs_info:git:*' formats ' %F{magenta}(%b)%f'
+setopt PROMPT_SUBST
 
-# Uncomment the following line to disable colors in ls.
-# DISABLE_LS_COLORS="true"
+# Prompt: directory (cyan) + git branch (magenta) + arrow (green)
+PROMPT='%F{cyan}%~%f${vcs_info_msg_0_} %F{green}❯%f '
 
-# Uncomment the following line to disable auto-setting terminal title.
-DISABLE_AUTO_TITLE="true"
+# Right prompt: timestamp
+RPROMPT='%F{240}%*%f'
 
-# Uncomment the following line to enable command auto-correction.
-# ENABLE_CORRECTION="true"
+# ─────────────────────────────────────────────────────────────
+# Navigation & Correction
+# ─────────────────────────────────────────────────────────────
+setopt AUTO_CD              # Type directory name to cd into it
+setopt CORRECT              # Suggest corrections for commands
+setopt CORRECT_ALL          # Suggest corrections for arguments too
+SPROMPT='zsh: correct %F{red}%R%f to %F{green}%r%f? [y/n/a/e] '
 
-# Uncomment the following line to display red dots whilst waiting for completion.
-# COMPLETION_WAITING_DOTS="true"
+# ─────────────────────────────────────────────────────────────
+# History
+# ─────────────────────────────────────────────────────────────
+HISTFILE=~/.zsh_history
+HISTSIZE=50000
+SAVEHIST=50000
+setopt SHARE_HISTORY        # Share history across terminals
+setopt HIST_IGNORE_DUPS     # Don't save duplicate lines
+setopt HIST_IGNORE_SPACE    # Don't save lines starting with space
+setopt HIST_REDUCE_BLANKS   # Remove extra blanks
+setopt INC_APPEND_HISTORY   # Add commands immediately
 
-# Uncomment the following line if you want to disable marking untracked files
-# under VCS as dirty. This makes repository status check for large repositories
-# much, much faster.
-# DISABLE_UNTRACKED_FILES_DIRTY="true"
+# ─────────────────────────────────────────────────────────────
+# Tab Completion Styling
+# ─────────────────────────────────────────────────────────────
+zstyle ':completion:*' menu select                       # Arrow key menu
+zstyle ':completion:*' matcher-list 'm:{a-z}={A-Z}'     # Case insensitive
+zstyle ':completion:*' list-colors ${(s.:.)LS_COLORS}   # Colored completions
+zstyle ':completion:*:descriptions' format '%F{yellow}── %d ──%f'
 
-# Uncomment the following line if you want to change the command execution time
-# stamp shown in the history command output.
-# The optional three formats: "mm/dd/yyyy"|"dd.mm.yyyy"|"yyyy-mm-dd"
-# HIST_STAMPS="mm/dd/yyyy"
+# ─────────────────────────────────────────────────────────────
+# Plugins (via Homebrew)
+# ─────────────────────────────────────────────────────────────
+# Autosuggestions (ghost text from history)
+[[ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
+  source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
-# Would you like to use another custom folder than $ZSH/custom?
-# ZSH_CUSTOM=/path/to/new-custom-folder
+# Syntax highlighting (green = valid, red = invalid)
+[[ -f $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
+  source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
 
-# Which plugins would you like to load? (plugins can be found in ~/.oh-my-zsh/plugins/*)
-# Custom plugins may be added to ~/.oh-my-zsh/custom/plugins/
-# Example format: plugins=(rails git textmate ruby lighthouse)
-# Add wisely, as too many plugins slow down shell startup.
-plugins=(git docker)
+# fzf keybindings (ctrl+r for fuzzy history)
+[[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
 
-source $ZSH/oh-my-zsh.sh
-
-# User configuration
-
-export PATH="/usr/local/bin:${PATH}:/Users/jhuggart/.rvm/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/opt/X11/bin:/usr/local/git/bin:/Users/jhuggart/bin:/Applications/Postgres.app/Contents/Versions/9.3/bin:/Users/jhuggart/bin:/Applications/Postgres.app/Contents/Versions/9.3/bin:/Users/jhuggart/Library/Android/sdk/tools:/Users/jhuggart/Library/Android/sdk/platform-tools:Users/jhuggart/gradle-2.1.1/bin"
-
-export ANDROID_HOME=/usr/local/opt/android-sdk
-# export MANPATH="/usr/local/man:$MANPATH"
-
-# You may need to manually set your language environment
-# export LANG=en_US.UTF-8
-
-# Preferred editor for local and remote sessions
-# if [[ -n $SSH_CONNECTION ]]; then
-#   export EDITOR='vim'
-# else
-#   export EDITOR='mvim'
-# fi
-
-# Compilation flags
-# export ARCHFLAGS="-arch x86_64"
-
-# ssh
-# export SSH_KEY_PATH="~/.ssh/dsa_id"
-
-# Set personal aliases, overriding those provided by oh-my-zsh libs,
-# plugins, and themes. Aliases can be placed here, though oh-my-zsh
-# users are encouraged to define aliases within the ZSH_CUSTOM folder.
-# For a full list of active aliases, run `alias`.
-#
-
-alias rld='source ~/.zshrc'
-alias pg='phonegap'
-alias pgs='phonegap serve'
-alias pra='phonegap run android'
-alias prad='phonegap run android --device'
-
-alias sd='docker-machine start default && eval "$(docker-machine env default)"'
-
-alias fuck='eval $(thefuck $(fc -ln -1 | tail -n 1)); fc -R'
-
-#teamocil autocomplete
-compctl -g '~/.teamocil/*(:t:r)' teamocil
-#
-# Example aliases
-# alias zshconfig="mate ~/.zshrc"
-# alias ohmyzsh="mate ~/.oh-my-zsh"
-alias tw="teamocil --here well"
-#alias vim="mvim -v"
-
-#ulimit -n 16384
-#ulimit -u 2048
-
-export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
-
-[ -s "/Users/jhuggart/.kre/kvm/kvm.sh" ] && . "/Users/jhuggart/.kre/kvm/kvm.sh" # Load kvm
-
-#nvm
-export NVM_DIR=~/.nvm
-source $(brew --prefix nvm)/nvm.sh
-
-#set docker env vars
-#eval "$(docker-machine env default)"
+# ─────────────────────────────────────────────────────────────
+# eza (modern ls replacement)
+# ─────────────────────────────────────────────────────────────
+if command -v eza &> /dev/null; then
+  alias ls='eza --color=always --icons'
+  alias ll='eza -la --color=always --icons --git'
+  alias lt='eza --tree --level=2 --icons'
+fi
