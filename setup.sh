@@ -32,6 +32,17 @@ brew install fzf
 brew install eza
 brew install nvm
 brew install ripgrep
+brew install go
+
+# Install Node via nvm
+export NVM_DIR="$HOME/.nvm"
+[ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
+nvm install --lts
+nvm use --lts
+
+# Install language servers
+go install golang.org/x/tools/gopls@latest
+npm install -g typescript typescript-language-server
 
 # Set up fzf key bindings
 yes | $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-bash --no-fish --no-update-rc
