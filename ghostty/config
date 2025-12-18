@@ -16,6 +16,3 @@ cursor-style-blink = false
 
 # Shell integration
 shell-integration = zsh
-
-# Launch tmux by default
-command = tmux new-session -A -s main
