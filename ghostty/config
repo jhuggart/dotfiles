@@ -8,7 +8,7 @@ window-padding-y = 10
 window-decoration = true
 
 # Theme (ghostty has nice built-ins)
-theme = GruvboxDark
+theme = Monokai Remastered
 
 # Cursor
 cursor-style = block

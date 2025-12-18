@@ -3,25 +3,16 @@ export PATH="$HOME/.local/bin:$PATH"
 alias vim="nvim"
 alias vi="nvim"
 
+# oh-my-zsh setup
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="refined"
+plugins=(git golang redis-cli docker docker-compose)
+source $ZSH/oh-my-zsh.sh
+
 # nvm setup
 export NVM_DIR="$HOME/.nvm"
 [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
 [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
-
-# git completion
-autoload -Uz compinit && compinit
-
-# Git branch for prompt
-autoload -Uz vcs_info
-precmd() { vcs_info }
-zstyle ':vcs_info:git:*' formats ' %F{magenta}(%b)%f'
-setopt PROMPT_SUBST
-
-# Prompt: directory (cyan) + git branch (magenta) + arrow (green)
-PROMPT='%F{cyan}%~%f${vcs_info_msg_0_} %F{green}❯%f '
-
-# Right prompt: timestamp
-RPROMPT='%F{240}%*%f'
 
 # ─────────────────────────────────────────────────────────────
 # Navigation & Correction
