@@ -65,11 +65,6 @@ backup_if_exists ~/.tmux.conf
 ln -s "$DOTFILES_DIR/.tmux.conf" ~/.tmux.conf
 echo "  Linked .tmux.conf"
 
-# vim
-backup_if_exists ~/.vimrc
-ln -s "$DOTFILES_DIR/.vimrc" ~/.vimrc
-echo "  Linked .vimrc"
-
 # ghostty
 mkdir -p ~/.config/ghostty
 backup_if_exists ~/.config/ghostty/config
