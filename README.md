@@ -1,6 +1,6 @@
 # dotfiles
 
-macOS shell setup with zsh, neovim, and Ghostty.
+macOS shell setup with zsh, Ghostty, tmux, and vim.
 
 ## Quick Start
 
@@ -26,8 +26,25 @@ cd ~/code/dotfiles
 - GruvboxDark theme
 - Clean padding and block cursor
 
+### Tmux
+
+Prefix is `Ctrl+A` (not the default `Ctrl+B`).
+
+| Keys | Action |
+|------|--------|
+| `Ctrl+A p` | Split pane horizontally |
+| `Ctrl+A v` | Split pane vertically |
+| `Ctrl+A x` | Kill pane (no confirm) |
+| `Ctrl+A r` | Reload config |
+| `Ctrl+A T` | Move window to first position |
+| `Ctrl+A h/j/k/l` | Resize pane |
+| `Ctrl+h/j/k/l` | Navigate panes (vim-aware) |
+
+**Vim integration:** Pane navigation works seamlessly between tmux and vim splits using `Ctrl+h/j/k/l`.
+
 ### Tools Installed
 - neovim
+- tmux
 - zsh-autosuggestions
 - zsh-syntax-highlighting
 - fzf

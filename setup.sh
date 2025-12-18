@@ -25,6 +25,7 @@ fi
 # ─────────────────────────────────────────────────────────────
 echo "Installing dependencies..."
 brew install neovim
+brew install tmux
 brew install zsh-autosuggestions
 brew install zsh-syntax-highlighting
 brew install fzf
@@ -57,6 +58,16 @@ backup_if_exists() {
 backup_if_exists ~/.zshrc
 ln -s "$DOTFILES_DIR/.zshrc" ~/.zshrc
 echo "  Linked .zshrc"
+
+# tmux
+backup_if_exists ~/.tmux.conf
+ln -s "$DOTFILES_DIR/.tmux.conf" ~/.tmux.conf
+echo "  Linked .tmux.conf"
+
+# vim
+backup_if_exists ~/.vimrc
+ln -s "$DOTFILES_DIR/.vimrc" ~/.vimrc
+echo "  Linked .vimrc"
 
 # ghostty
 mkdir -p ~/.config/ghostty
