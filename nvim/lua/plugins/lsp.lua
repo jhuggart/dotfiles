@@ -2,8 +2,6 @@ return {
   "neovim/nvim-lspconfig",
   event = { "BufReadPre", "BufNewFile" },
   config = function()
-    local lspconfig = require("lspconfig")
-
     -- Shared keybindings for all LSP servers
     local on_attach = function(_, bufnr)
       local opts = { buffer = bufnr }
@@ -16,14 +14,12 @@ return {
       vim.keymap.set("n", "<leader>ca", vim.lsp.buf.code_action, opts)
     end
 
-    -- Go
-    lspconfig.gopls.setup({
+    -- Shared config for all LSP servers
+    vim.lsp.config("*", {
       on_attach = on_attach,
     })
 
-    -- TypeScript
-    lspconfig.ts_ls.setup({
-      on_attach = on_attach,
-    })
+    -- Enable LSP servers (configs provided by nvim-lspconfig)
+    vim.lsp.enable({ "gopls", "ts_ls" })
   end,
 }
