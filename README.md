@@ -42,6 +42,24 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 
 **Vim integration:** Pane navigation works seamlessly between tmux and vim splits using `Ctrl+h/j/k/l`.
 
+### Neovim
+
+| Keys | Action |
+|------|--------|
+| `Ctrl+p` | Find files (telescope) |
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `gr` | Find references |
+| `gi` | Go to implementation |
+| `K` | Hover documentation |
+| `\rn` | Rename symbol |
+| `\ca` | Code actions |
+| `\fg` | Live grep (search in files) |
+| `\fb` | List buffers |
+| `Ctrl+h/j/k/l` | Navigate splits/tmux panes |
+
+**LSP support:** Go (gopls) and TypeScript (typescript-language-server).
+
 ### Tools Installed
 - neovim
 - tmux
@@ -50,6 +68,8 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 - fzf
 - eza
 - nvm
+- ripgrep
+- go
 - JetBrainsMono Nerd Font
 
 ## Customization
