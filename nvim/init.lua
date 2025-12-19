@@ -28,5 +28,9 @@ if vim.env.TMUX then
   vim.opt.termguicolors = true
 end
 
+-- Jump list navigation
+vim.keymap.set("n", "<C-[>", "<C-o>", { desc = "Jump back" })
+vim.keymap.set("n", "<C-]>", "<C-i>", { desc = "Jump forward" })
+
 -- Load plugins
 require("lazy").setup("plugins")
