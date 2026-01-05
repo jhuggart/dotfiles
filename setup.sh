@@ -65,7 +65,7 @@ fi
 
 # Install tmux plugins via TPM
 echo "Installing tmux plugins..."
-~/.tmux/plugins/tpm/bin/install_plugins
+tmux start-server \; source-file ~/.tmux.conf && ~/.tmux/plugins/tpm/bin/install_plugins
 
 # Install Nerd Font
 echo "Installing Nerd Font..."
