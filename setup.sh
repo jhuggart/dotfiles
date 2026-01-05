@@ -41,6 +41,8 @@ brew install eza
 brew install nvm
 brew install ripgrep
 brew install go
+brew install zoxide
+brew install terminal-notifier
 
 # Install Node via nvm
 export NVM_DIR="$HOME/.nvm"
@@ -55,6 +57,16 @@ npm install -g typescript typescript-language-server
 # Set up fzf key bindings
 yes | $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-bash --no-fish --no-update-rc
 
+# Install TPM (tmux plugin manager)
+if [[ ! -d "$HOME/.tmux/plugins/tpm" ]]; then
+  echo "Installing TPM..."
+  git clone https://github.com/tmux-plugins/tpm ~/.tmux/plugins/tpm
+fi
+
+# Install tmux plugins via TPM
+echo "Installing tmux plugins..."
+~/.tmux/plugins/tpm/bin/install_plugins
+
 # Install Nerd Font
 echo "Installing Nerd Font..."
 brew install --cask font-jetbrains-mono-nerd-font
@@ -64,37 +76,55 @@ brew install --cask font-jetbrains-mono-nerd-font
 # ─────────────────────────────────────────────────────────────
 echo "Creating symlinks..."
 
-# Backup existing files
-backup_if_exists() {
-  if [[ -e "$1" && ! -L "$1" ]]; then
-    echo "  Backing up $1 to $1.backup"
-    mv "$1" "$1.backup"
-  elif [[ -L "$1" ]]; then
-    rm "$1"
+# Create symlink if it doesn't exist or points elsewhere
+link_file() {
+  local src="$1"
+  local dest="$2"
+
+  # Already correctly linked
+  if [[ -L "$dest" && "$(readlink "$dest")" == "$src" ]]; then
+    echo "  $dest already linked"
+    return
   fi
+
+  # Backup if regular file exists
+  if [[ -e "$dest" && ! -L "$dest" ]]; then
+    echo "  Backing up $dest to $dest.backup"
+    mv "$dest" "$dest.backup"
+  elif [[ -L "$dest" ]]; then
+    rm "$dest"
+  fi
+
+  ln -s "$src" "$dest"
+  echo "  Linked $dest"
 }
 
 # zsh
-backup_if_exists ~/.zshrc
-ln -s "$DOTFILES_DIR/.zshrc" ~/.zshrc
-echo "  Linked .zshrc"
+link_file "$DOTFILES_DIR/.zshrc" ~/.zshrc
 
 # tmux
-backup_if_exists ~/.tmux.conf
-ln -s "$DOTFILES_DIR/.tmux.conf" ~/.tmux.conf
-echo "  Linked .tmux.conf"
+link_file "$DOTFILES_DIR/.tmux.conf" ~/.tmux.conf
 
 # ghostty
 mkdir -p ~/.config/ghostty
-backup_if_exists ~/.config/ghostty/config
-ln -s "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
-echo "  Linked ghostty/config"
+link_file "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
 
 # neovim
 mkdir -p ~/.config
-backup_if_exists ~/.config/nvim
-ln -s "$DOTFILES_DIR/nvim" ~/.config/nvim
-echo "  Linked nvim"
+link_file "$DOTFILES_DIR/nvim" ~/.config/nvim
+
+# claude code scripts
+mkdir -p ~/.claude/scripts
+link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/notify-waiting.sh
+link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
+
+# claude code settings (merge hooks if settings.json exists)
+if [[ ! -f ~/.claude/settings.json ]]; then
+  cp "$DOTFILES_DIR/claude/settings.json" ~/.claude/settings.json
+  echo "  Created ~/.claude/settings.json"
+else
+  echo "  ~/.claude/settings.json exists - please manually add hooks from $DOTFILES_DIR/claude/settings.json"
+fi
 
 # ─────────────────────────────────────────────────────────────
 # Set zsh as default shell
@@ -113,5 +143,7 @@ echo "  Next steps:"
 echo "  1. Restart your terminal (or run: source ~/.zshrc)"
 echo "  2. Set terminal font to 'JetBrainsMono Nerd Font'"
 echo ""
-echo "  Ghostty themes: run 'ghostty +list-themes' to see options"
+echo "  Tips:"
+echo "  - Ghostty themes: run 'ghostty +list-themes' to see options"
+echo "  - Use 'z <partial-dir>' to jump to directories with zoxide"
 echo ""
