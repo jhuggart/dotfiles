@@ -113,7 +113,7 @@ link_file "$DOTFILES_DIR/ghostty/config" ~/.config/ghostty/config
 mkdir -p ~/.config
 link_file "$DOTFILES_DIR/nvim" ~/.config/nvim
 
-# claude code scripts
+# claude code
 mkdir -p ~/.claude/scripts
 link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/notify-waiting.sh
 link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
@@ -124,12 +124,19 @@ for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
   [ -f "$cmd" ] && link_file "$cmd" ~/.claude/commands/$(basename "$cmd")
 done
 
-# claude code settings (merge hooks if settings.json exists)
-if [[ ! -f ~/.claude/settings.json ]]; then
+# Copy settings.json (not symlinked - Claude Code adds runtime state to it)
+if [[ ! -f ~/.claude/settings.json ]] || [[ -L ~/.claude/settings.json ]]; then
+  rm -f ~/.claude/settings.json
   cp "$DOTFILES_DIR/claude/settings.json" ~/.claude/settings.json
   echo "  Created ~/.claude/settings.json"
 else
-  echo "  ~/.claude/settings.json exists - please manually add hooks from $DOTFILES_DIR/claude/settings.json"
+  read -p "  ~/.claude/settings.json exists. Overwrite? [y/N] " response
+  if [[ "$response" =~ ^[Yy]$ ]]; then
+    cp "$DOTFILES_DIR/claude/settings.json" ~/.claude/settings.json
+    echo "  Replaced ~/.claude/settings.json"
+  else
+    echo "  Skipped ~/.claude/settings.json"
+  fi
 fi
 
 # ─────────────────────────────────────────────────────────────
