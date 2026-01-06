@@ -20,6 +20,8 @@ cd ~/code/dotfiles
 - Auto-cd, typo correction
 - 50k shared history across terminals
 - `eza` aliases: `ls` (icons), `ll` (detailed + git), `lt` (tree)
+- `zoxide` smart directory jumping: `z foo` jumps to any directory containing "foo"
+- Lazy-loaded NVM for faster shell startup
 
 ### Ghostty
 - JetBrains Mono Nerd Font
@@ -39,8 +41,12 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 | `Ctrl+A T` | Move window to first position |
 | `Ctrl+A h/j/k/l` | Resize pane |
 | `Ctrl+h/j/k/l` | Navigate panes (vim-aware) |
+| `Ctrl+A I` | Install TPM plugins |
+| `Ctrl+A U` | Update TPM plugins |
 
 **Vim integration:** Pane navigation works seamlessly between tmux and vim splits using `Ctrl+h/j/k/l`.
+
+**Session persistence:** Sessions are automatically saved and restored on restart via tmux-resurrect and tmux-continuum.
 
 ### Neovim
 
@@ -58,15 +64,18 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 | `\fb` | List buffers |
 | `Ctrl+h/j/k/l` | Navigate splits/tmux panes |
 
+**Auto-completion:** Full LSP-powered completion with nvim-cmp. Use `Tab`/`S-Tab` to navigate, `Enter` to confirm, `Ctrl+Space` to trigger manually.
+
 **LSP support:** Go (gopls) and TypeScript (typescript-language-server).
 
 ### Tools Installed
 - neovim
-- tmux
+- tmux (with TPM plugin manager)
 - zsh-autosuggestions
 - zsh-syntax-highlighting
 - fzf
 - eza
+- zoxide
 - nvm
 - ripgrep
 - go
