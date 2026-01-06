@@ -1,4 +1,4 @@
-export PATH="$HOME/.local/bin:$PATH"
+export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
 
 # Auto-start tmux
 if command -v tmux &> /dev/null && [[ -z "$TMUX" ]]; then
