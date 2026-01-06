@@ -66,6 +66,7 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 | Command | Action |
 |---------|--------|
 | `/cppr` | Commit, push, open PR, and watch GitHub Actions |
+| `/merge` | Merge current branch's PR to main |
 
 **Tmux window highlighting:**
 - Yellow - Claude is waiting for input
