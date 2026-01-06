@@ -11,13 +11,21 @@ alias vi="nvim"
 # oh-my-zsh setup
 export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="refined"
+DISABLE_UNTRACKED_FILES_DIRTY="true"
 plugins=(git golang redis-cli docker docker-compose)
 source $ZSH/oh-my-zsh.sh
 
-# nvm setup
+# nvm setup (lazy-loaded for faster shell startup)
 export NVM_DIR="$HOME/.nvm"
-[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
-[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+lazy_load_nvm() {
+  unset -f nvm node npm npx
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+}
+nvm() { lazy_load_nvm && nvm "$@"; }
+node() { lazy_load_nvm && node "$@"; }
+npm() { lazy_load_nvm && npm "$@"; }
+npx() { lazy_load_nvm && npx "$@"; }
 
 # ─────────────────────────────────────────────────────────────
 # Navigation & Correction
@@ -60,6 +68,9 @@ zstyle ':completion:*:descriptions' format '%F{yellow}── %d ──%f'
 
 # fzf keybindings (ctrl+r for fuzzy history)
 [[ -f ~/.fzf.zsh ]] && source ~/.fzf.zsh
+
+# zoxide (smart cd replacement)
+command -v zoxide &> /dev/null && eval "$(zoxide init zsh)"
 
 # ─────────────────────────────────────────────────────────────
 # eza (modern ls replacement)
