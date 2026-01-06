@@ -118,6 +118,12 @@ mkdir -p ~/.claude/scripts
 link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/notify-waiting.sh
 link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
 
+# claude code commands
+mkdir -p ~/.claude/commands
+for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
+  [ -f "$cmd" ] && link_file "$cmd" ~/.claude/commands/$(basename "$cmd")
+done
+
 # claude code settings (merge hooks if settings.json exists)
 if [[ ! -f ~/.claude/settings.json ]]; then
   cp "$DOTFILES_DIR/claude/settings.json" ~/.claude/settings.json
