@@ -52,6 +52,8 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 
 | Keys | Action |
 |------|--------|
+| `\e` | Toggle file explorer (neo-tree) |
+| `\o` | Focus file explorer |
 | `Ctrl+p` | Find files (telescope) |
 | `gd` | Go to definition |
 | `gD` | Go to declaration |
