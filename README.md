@@ -60,6 +60,18 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 
 **LSP support:** Go (gopls) and TypeScript (typescript-language-server).
 
+### Claude Code
+
+**Slash commands:**
+| Command | Action |
+|---------|--------|
+| `/cppr` | Commit, push, open PR, and watch GitHub Actions |
+
+**Tmux window highlighting:**
+- Yellow - Claude is waiting for input
+- Green - Claude has finished
+- Highlighting only appears on background windows and clears when focused
+
 ### Tools Installed
 - neovim
 - tmux
@@ -70,6 +82,7 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 - nvm
 - ripgrep
 - go
+- terminal-notifier
 - JetBrainsMono Nerd Font
 
 ## Customization
