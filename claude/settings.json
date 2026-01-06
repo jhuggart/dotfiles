@@ -1,5 +1,18 @@
 {
+  "includeCoAuthoredBy": false,
+  "model": "opus",
   "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "*.go",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "goimports -w $CLAUDE_FILE_PATHS"
+          }
+        ]
+      }
+    ],
     "Notification": [
       {
         "matcher": "",
@@ -22,5 +35,13 @@
         ]
       }
     ]
-  }
+  },
+  "statusLine": {
+    "type": "command",
+    "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); git_branch=$(cd \"$cwd\" 2>/dev/null && git branch --show-current 2>/dev/null || echo ''); if [ -n \"$git_branch\" ]; then printf \"%s in %s on %s@%s\" \"$model\" \"$(basename \"$cwd\")\" \"$git_branch\" \"$(hostname -s)\"; else printf \"%s in %s@%s\" \"$model\" \"$(basename \"$cwd\")\" \"$(hostname -s)\"; fi"
+  },
+  "enabledPlugins": {
+    "superpowers@superpowers-marketplace": true
+  },
+  "alwaysThinkingEnabled": true
 }
