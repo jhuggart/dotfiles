@@ -73,6 +73,7 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 **Slash commands:**
 | Command | Action |
 |---------|--------|
+| `/cp` | Commit and push |
 | `/cppr` | Commit, push, open PR, and watch GitHub Actions |
 | `/merge` | Merge current branch's PR to main |
 
