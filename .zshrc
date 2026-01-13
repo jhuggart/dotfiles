@@ -80,3 +80,8 @@ if command -v eza &> /dev/null; then
   alias ll='eza -la --color=always --icons --git'
   alias lt='eza --tree --level=2 --icons'
 fi
+
+# ─────────────────────────────────────────────────────────────
+# Local Configuration (secrets, machine-specific settings)
+# ─────────────────────────────────────────────────────────────
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
