@@ -102,6 +102,9 @@ link_file() {
 # zsh
 link_file "$DOTFILES_DIR/.zshrc" ~/.zshrc
 
+# bash (for Claude Code and other non-zsh shells)
+link_file "$DOTFILES_DIR/.bash_profile" ~/.bash_profile
+
 # tmux
 link_file "$DOTFILES_DIR/.tmux.conf" ~/.tmux.conf
 
