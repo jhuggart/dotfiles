@@ -17,6 +17,7 @@ source $ZSH/oh-my-zsh.sh
 
 # nvm setup (lazy-loaded for faster shell startup)
 export NVM_DIR="$HOME/.nvm"
+export BASH_ENV="$HOME/.bash_profile"  # For non-interactive bash (e.g., Claude Code)
 lazy_load_nvm() {
   unset -f nvm node npm npx
   [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
