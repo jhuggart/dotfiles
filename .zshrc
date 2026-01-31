@@ -15,19 +15,11 @@ DISABLE_UNTRACKED_FILES_DIRTY="true"
 plugins=(git golang redis-cli docker docker-compose)
 source $ZSH/oh-my-zsh.sh
 
-# nvm setup (lazy-loaded for faster shell startup)
+# nvm setup
 export NVM_DIR="$HOME/.nvm"
 export BASH_ENV="$HOME/.bash_profile"  # For non-interactive bash (e.g., Claude Code)
-lazy_load_nvm() {
-  unset -f nvm node npm npx
-  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
-  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
-  nvm use default --silent
-}
-nvm() { lazy_load_nvm && nvm "$@"; }
-node() { lazy_load_nvm && node "$@"; }
-npm() { lazy_load_nvm && npm "$@"; }
-npx() { lazy_load_nvm && npx "$@"; }
+[ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+[ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
 
 # ─────────────────────────────────────────────────────────────
 # Navigation & Correction
