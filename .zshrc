@@ -22,6 +22,7 @@ lazy_load_nvm() {
   unset -f nvm node npm npx
   [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
   [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+  nvm use default --silent
 }
 nvm() { lazy_load_nvm && nvm "$@"; }
 node() { lazy_load_nvm && node "$@"; }
