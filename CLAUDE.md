@@ -31,3 +31,12 @@ Commands in `claude/commands/` are automatically symlinked to `~/.claude/command
 ## Tmux Window Highlighting
 
 The notification scripts (`claude/scripts/`) set tmux user options (`@claude-waiting`, `@claude-done`) to highlight windows when Claude needs attention.
+
+## Debugging & Investigation
+
+- When investigating configuration issues, always trace the full config flow from source (config files, environment variables) through to usage. Don't assume defaults in code are actually used - verify that config values are being passed through.
+- For latency/performance investigations, gather multiple data points before concluding root cause. Present findings as hypotheses to verify rather than definitive diagnoses.
+
+## Git Workflow
+
+- When working with worktrees, always confirm the worktree is created and switched to before making changes. Use `git worktree list` to verify.
