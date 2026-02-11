@@ -78,4 +78,11 @@ fi
 # ─────────────────────────────────────────────────────────────
 # Local Configuration (secrets, machine-specific settings)
 # ─────────────────────────────────────────────────────────────
+if [[ -f ~/.env.local ]]; then
+  if [[ "$(stat -f '%Lp' ~/.env.local)" == "600" ]]; then
+    source ~/.env.local
+  else
+    echo "WARNING: ~/.env.local has insecure permissions (expected 600), skipping"
+  fi
+fi
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
