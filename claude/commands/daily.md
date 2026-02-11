@@ -13,7 +13,8 @@ digraph daily {
     "1. Get today's calendar" -> "2. Get Things Today tasks";
     "2. Get Things Today tasks" -> "3. Check Things Inbox";
     "3. Check Things Inbox" -> "4. Review RFDs";
-    "4. Review RFDs" -> "5. Summarize & prompt";
+    "4. Review RFDs" -> "5. Check yesterday's notes";
+    "5. Check yesterday's notes" -> "6. Summarize & prompt";
 }
 ```
 
@@ -23,7 +24,8 @@ digraph daily {
 2. **Things Today** - Get critical work tasks using `mcp__things__get_today`
 3. **Things Inbox** - Surface items needing triage using `mcp__things__get_inbox`
 4. **RFDs** - Check for RFDs needing review or action
-5. **Summarize** - Present overview and offer to create daily note
+5. **Yesterday's Notes** - Prompt to ensure yesterday's notes have been transcribed
+6. **Summarize** - Present overview and offer to create daily note
 
 ## Output Format
 
@@ -47,6 +49,9 @@ Present a clean summary:
 ### RFDs to Review
 - RFD-123: Title (awaiting review)
 - RFD-456: Title (recently updated)
+
+### Yesterday's Notes
+Have you transcribed yesterday's notes? (meetings, conversations, ideas)
 
 ---
 Ready to create daily note? (Daily/{date}.md)
