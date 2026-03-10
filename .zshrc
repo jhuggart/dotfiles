@@ -1,9 +1,9 @@
 export PATH="$HOME/go/bin:$HOME/.local/bin:$PATH"
 
-# Auto-start tmux
-if command -v tmux &> /dev/null && [[ -z "$TMUX" ]]; then
-  exec tmux new-session -A -s main
-fi
+# Auto-start tmux (disabled - use `tmux new-session -A -s main` to enter manually)
+# if command -v tmux &> /dev/null && [[ -z "$TMUX" ]]; then
+#   exec tmux new-session -A -s main
+# fi
 
 alias vim="nvim"
 alias vi="nvim"
