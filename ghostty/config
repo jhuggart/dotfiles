@@ -17,3 +17,6 @@ cursor-style-blink = false
 # Shell integration
 shell-integration = zsh
 shell-integration-features = no-cursor
+
+# Use standard TERM for SSH compatibility (remote servers lack xterm-ghostty terminfo)
+term = xterm-256color
