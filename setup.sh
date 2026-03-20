@@ -121,6 +121,9 @@ mkdir -p ~/.claude/scripts
 link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/notify-waiting.sh
 link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
 
+# claude code global CLAUDE.md
+link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
+
 # claude code commands
 mkdir -p ~/.claude/commands
 for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do

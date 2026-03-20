@@ -41,3 +41,4 @@ The notification scripts (`claude/scripts/`) set tmux user options (`@claude-wai
 
 - When working with worktrees, always confirm the worktree is created and switched to before making changes. Use `git worktree list` to verify.
 - When building implementation plans, always include a fresh worktree creation as the first step to isolate changes from the main workspace.
+- Write plans to .md files before executing, delete after entire plan has been completed and before final commit for that plan

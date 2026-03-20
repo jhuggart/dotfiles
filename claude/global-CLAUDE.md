@@ -1,0 +1,3 @@
+- Prefer the gh cli for looking at anything in github
+- Write plans to .md files before executing, delete after entire plan has been completed and before final commit for that plan
+- Be sure to include current worktree in plans AND when generating a new plan be certain to include an instruction to perform the work in current worktree
