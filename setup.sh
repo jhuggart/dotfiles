@@ -120,6 +120,7 @@ link_file "$DOTFILES_DIR/nvim" ~/.config/nvim
 mkdir -p ~/.claude/scripts
 link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/notify-waiting.sh
 link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
+link_file "$DOTFILES_DIR/claude/scripts/qrspi-utils.sh" ~/.claude/scripts/qrspi-utils.sh
 
 # claude code global CLAUDE.md
 link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
