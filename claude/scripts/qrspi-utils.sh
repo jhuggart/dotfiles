@@ -98,7 +98,7 @@ qrspi_find_active_spec() {
   fi
   # Find the most recently modified manifest
   local latest
-  latest=$(find "$base" -name manifest.json -printf '%T@ %h\n' 2>/dev/null | sort -rn | head -1 | awk '{print $2}')
+  latest=$(find "$base" -name manifest.json -exec stat -f '%m %N' {} \; 2>/dev/null | sed 's|/manifest\.json$||' | sort -rn | head -1 | awk '{print $2}')
   echo "${latest:-}"
 }
 
