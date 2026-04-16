@@ -18,15 +18,15 @@ dotfiles/
 ├── ghostty/config      # Ghostty terminal config
 ├── nvim/               # Neovim configuration
 ├── claude/
-│   ├── commands/       # Claude Code slash commands (auto-symlinked)
+│   ├── skills/         # Claude Code skills (auto-symlinked, one dir per skill)
 │   ├── scripts/        # Notification scripts for tmux highlighting
 │   └── settings.json   # Claude Code settings template
 └── setup.sh            # Installation script
 ```
 
-## Claude Code Commands
+## Claude Code Skills
 
-Commands in `claude/commands/` are automatically symlinked to `~/.claude/commands/` by setup.sh.
+Skills in `claude/skills/*/SKILL.md` are automatically symlinked to `~/.claude/skills/` by setup.sh.
 
 ## Tmux Window Highlighting
 
