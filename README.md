@@ -72,12 +72,16 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 
 ### Claude Code
 
-**Slash commands:**
-| Command | Action |
-|---------|--------|
-| `/cp` | Commit and push |
-| `/cppr` | Commit, push, open PR, and watch GitHub Actions |
-| `/merge` | Merge current branch's PR to main |
+**Skills:**
+| Skill | Action |
+|-------|--------|
+| `cp` | Commit and push |
+| `cps` | Commit, push, deploy to staging |
+| `cppr` | Commit, push, open PR, watch GitHub Actions |
+| `cpprs` | Commit, push, open PR, watch Actions, deploy to staging |
+| `merge` | Merge current branch's PR to main |
+| `daily` | Daily startup workflow |
+| `setup-personal-proj` | Scaffold Cloudflare MCP permissions for a personal project |
 
 **Tmux window highlighting:**
 - Yellow - Claude is waiting for input

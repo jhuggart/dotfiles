@@ -1,6 +1,10 @@
 ---
-description: commit, push, open PR, watch actions, and deploy to staging
+name: cpprs
+description: Use when the user asks to commit, push, open a PR, watch CI, and deploy to staging
 ---
+
+# Commit, Push, PR, Watch Actions, Deploy to Staging
+
 1. Commit all staged changes with an appropriate message
 2. Push to remote
 3. Open a pull request using `gh pr create`
