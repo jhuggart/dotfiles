@@ -124,11 +124,23 @@ link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify
 # claude code global CLAUDE.md
 link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
 
-# claude code commands
-mkdir -p ~/.claude/commands
-for cmd in "$DOTFILES_DIR/claude/commands"/*.md; do
-  [ -f "$cmd" ] && link_file "$cmd" ~/.claude/commands/$(basename "$cmd")
+# claude code skills
+mkdir -p ~/.claude/skills
+for skill_dir in "$DOTFILES_DIR/claude/skills"/*/; do
+  [ -d "$skill_dir" ] && link_file "${skill_dir%/}" ~/.claude/skills/"$(basename "$skill_dir")"
 done
+
+# Clean up old command symlinks from previous dotfiles versions
+if [[ -d ~/.claude/commands ]]; then
+  for old_cmd in ~/.claude/commands/*.md; do
+    [ -L "$old_cmd" ] || continue
+    target="$(readlink "$old_cmd")"
+    if [[ "$target" == "$DOTFILES_DIR/claude/commands/"* ]]; then
+      rm "$old_cmd"
+      echo "  Removed stale command symlink $old_cmd"
+    fi
+  done
+fi
 
 # Copy settings.json (not symlinked - Claude Code adds runtime state to it)
 if [[ ! -f ~/.claude/settings.json ]] || [[ -L ~/.claude/settings.json ]]; then

@@ -1,6 +1,8 @@
 ---
+name: daily
 description: Use when starting the workday to review tasks, calendar, and set up daily note
 ---
+
 # Daily Startup
 
 ## Workflow

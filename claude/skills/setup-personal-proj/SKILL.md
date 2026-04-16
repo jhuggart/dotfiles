@@ -1,6 +1,10 @@
 ---
-description: Set up Claude Code permissions for a personal project (Cloudflare MCP tools)
+name: setup-personal-proj
+description: Use when setting up a personal project with Claude Code Cloudflare MCP permissions
 ---
+
+# Set up Personal Project
+
 1. Create `.claude/` directory in the current project if it doesn't exist
 2. Copy the personal project permissions template into place by running: `cp ~/code/dotfiles/claude/templates/personal-permissions.json .claude/settings.local.json`
 3. Confirm the file was created and show the user what permissions were added
