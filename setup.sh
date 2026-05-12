@@ -43,6 +43,7 @@ brew install ripgrep
 brew install go
 brew install zoxide
 brew install terminal-notifier
+brew install uv
 
 # Install Node via nvm
 export NVM_DIR="$HOME/.nvm"
@@ -156,6 +157,20 @@ else
   else
     echo "  Skipped ~/.claude/settings.json"
   fi
+fi
+
+# ─────────────────────────────────────────────────────────────
+# Register Things MCP server with Claude Code (user scope, via uvx)
+# ─────────────────────────────────────────────────────────────
+if command -v claude &> /dev/null; then
+  if ! claude mcp list 2>/dev/null | grep -q '^things:'; then
+    echo "Registering Things MCP with Claude Code..."
+    claude mcp add-json -s user things '{"command":"uvx","args":["things-mcp"]}'
+  else
+    echo "  Things MCP already registered with Claude Code"
+  fi
+else
+  echo "  Claude CLI not found on PATH — skipping Things MCP registration"
 fi
 
 # ─────────────────────────────────────────────────────────────

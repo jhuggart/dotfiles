@@ -100,7 +100,10 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 - ripgrep
 - go
 - terminal-notifier
+- uv (provides `uvx`, used to launch the Things MCP server)
 - JetBrainsMono Nerd Font
+
+**Things MCP:** `setup.sh` registers [hald/things-mcp](https://github.com/hald/things-mcp) with Claude Code at user scope (`uvx things-mcp`) so the `daily` skill can read your Things 3 today/inbox. Requires Things 3 with "Enable Things URLs" turned on.
 
 ## Customization
 
