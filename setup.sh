@@ -44,6 +44,8 @@ brew install go
 brew install zoxide
 brew install terminal-notifier
 brew install uv
+brew install pandoc
+brew install typst
 
 # Install Node via nvm
 export NVM_DIR="$HOME/.nvm"
@@ -71,6 +73,12 @@ tmux start-server \; source-file ~/.tmux.conf && ~/.tmux/plugins/tpm/bin/install
 # Install Nerd Font
 echo "Installing Nerd Font..."
 brew install --cask font-jetbrains-mono-nerd-font
+
+# ─────────────────────────────────────────────────────────────
+# Install Supernote Cloud CLI (used by the daily skill to publish notes)
+# ─────────────────────────────────────────────────────────────
+echo "Installing Supernote Cloud CLI..."
+uv tool install --force 'sncloud==0.2.1'
 
 # ─────────────────────────────────────────────────────────────
 # Create symlinks
@@ -122,6 +130,7 @@ mkdir -p ~/.claude/scripts
 link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/notify-waiting.sh
 link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
 link_file "$DOTFILES_DIR/claude/scripts/qrspi-utils.sh" ~/.claude/scripts/qrspi-utils.sh
+link_file "$DOTFILES_DIR/claude/scripts/publish-to-supernote.sh" ~/.claude/scripts/publish-to-supernote.sh
 
 # claude code global CLAUDE.md
 link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
