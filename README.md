@@ -102,12 +102,11 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 - terminal-notifier
 - uv (provides `uvx`, used to launch the Things MCP server)
 - pandoc + typst (Markdown → PDF for the `daily` skill's Supernote publishing)
-- sncloud (Supernote Cloud CLI, installed via `uv tool`)
 - JetBrainsMono Nerd Font
 
 **Things MCP:** `setup.sh` registers [hald/things-mcp](https://github.com/hald/things-mcp) with Claude Code at user scope (`uvx things-mcp`) so the `daily` skill can read your Things 3 today/inbox. Requires Things 3 with "Enable Things URLs" turned on.
 
-**Supernote publishing:** the `daily` skill can publish your daily note to a Supernote tablet. It pulls Escape Collective articles into the note as summaries with links, then converts the note to PDF and uploads it via the `sncloud` CLI; the tablet syncs it down. Run `sncloud login` once to pair your Supernote Cloud account.
+**Supernote publishing:** the `daily` skill can publish your daily note to a Supernote tablet. It pulls Escape Collective articles into the note as summaries with links, then converts the note to PDF and uploads it to the Google Drive folder the Supernote syncs — the same Drive delivery `ebook-sync` uses. Put the four `GDRIVE_*` credentials in `~/.claude/secrets/gdrive-supernote.env`; the upload script (run via `uv`) resolves its Python dependencies itself.
 
 ## Customization
 

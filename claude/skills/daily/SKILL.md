@@ -87,16 +87,17 @@ After the note is created, ask: "Publish today's note to your Supernote? [y/N]"
 If the user confirms, run:
 
 ```
-~/.claude/scripts/publish-to-supernote.sh "<path to the daily note just created>"
+~/.claude/scripts/publish-to-supernote.py "<path to the daily note just created>"
 ```
 
 The script converts the note to PDF (via `pandoc`/`typst`) and uploads it to
-Supernote Cloud with `sncloud`; the tablet picks it up on its next sync. Its
-input is the Obsidian note file itself, so the tablet PDF is a faithful mirror
-of the Obsidian note.
+the Google Drive folder the Supernote syncs; the tablet picks it up on its next
+sync. Its input is the Obsidian note file itself, so the tablet PDF is a
+faithful mirror of the Obsidian note.
 
-Requires a one-time `sncloud login` — if that hasn't been done the script prints
-a reminder; relay it to the user.
+Credentials are read from `~/.claude/secrets/gdrive-supernote.env` (the four
+`GDRIVE_*` values from the NAS ebook-sync `.env`). If that file is missing or
+the token is rejected, the script prints what to do; relay it to the user.
 
 ## Tools Used
 
@@ -115,7 +116,7 @@ a reminder; relay it to the user.
   - Action items and calls to action
   - Key dates or deadlines
   - Links to take action
-- `~/.claude/scripts/publish-to-supernote.sh` - publish the daily note to the Supernote tablet:
+- `~/.claude/scripts/publish-to-supernote.py` - publish the daily note to the Supernote tablet:
   - Pass the daily note's full path as the argument
-  - Converts the note to PDF via `pandoc`/`typst` and uploads it to Supernote Cloud via `sncloud put`
-  - Requires a one-time `sncloud login`; the script prints a reminder if auth is missing
+  - Converts the note to PDF via `pandoc`/`typst` and uploads it to the Google Drive folder the Supernote syncs (the same folder ebook-sync delivers books to)
+  - Reads Drive credentials from `~/.claude/secrets/gdrive-supernote.env`; the script prints setup instructions if that file is missing
