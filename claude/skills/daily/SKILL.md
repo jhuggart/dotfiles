@@ -14,11 +14,10 @@ digraph daily {
 
     "1. Get today's calendar" -> "2. Get Things Today tasks";
     "2. Get Things Today tasks" -> "3. Check Things Inbox";
-    "3. Check Things Inbox" -> "4. Review RFDs";
-    "4. Review RFDs" -> "5. Escape Collective feed";
-    "5. Escape Collective feed" -> "6. Indivisible daily action";
-    "6. Indivisible daily action" -> "7. Check yesterday's notes";
-    "7. Check yesterday's notes" -> "8. Summarize & prompt";
+    "3. Check Things Inbox" -> "4. Escape Collective feed";
+    "4. Escape Collective feed" -> "5. Indivisible daily action";
+    "5. Indivisible daily action" -> "6. Check yesterday's notes";
+    "6. Check yesterday's notes" -> "7. Summarize & prompt";
 }
 ```
 
@@ -27,11 +26,10 @@ digraph daily {
 1. **Calendar** - Fetch today's meetings via `icalbuddy`
 2. **Things Today** - Get critical work tasks using `mcp__things__get_today`
 3. **Things Inbox** - Surface items needing triage using `mcp__things__get_inbox`
-4. **RFDs** - Check for RFDs needing review or action
-5. **Escape Collective** - Fetch latest unread articles from private RSS feed using WebFetch. Show title, author, and a one-line summary for each article
-6. **Indivisible Daily Action** - Search Gmail for the most recent email from `action@birminghamindivisible.org`, read it, and summarize the action items
-7. **Yesterday's Notes** - Prompt to ensure yesterday's notes have been transcribed
-8. **Summarize** - Present overview and offer to create daily note
+4. **Escape Collective** - Read RSS feed URL from `~/.claude/secrets/escape-collective-rss-url`. If the file is missing or empty, prompt the user to create it (single line containing their personal feed URL) and skip this step. Otherwise fetch via WebFetch and show title, author, and a one-line summary per article
+5. **Indivisible Daily Action** - Search Gmail threads for the most recent thread from `action@birminghamindivisible.org`, read it, and summarize the action items
+6. **Yesterday's Notes** - Prompt to ensure yesterday's notes have been transcribed
+7. **Summarize** - Present overview and offer to create daily note
 
 ## Output Format
 
@@ -51,10 +49,6 @@ Present a clean summary:
 ### Inbox (needs triage)
 - Item 1
 - Item 2
-
-### RFDs to Review
-- RFD-123: Title (awaiting review)
-- RFD-456: Title (recently updated)
 
 ### Escape Collective
 - Article Title - Author - Brief summary
@@ -84,16 +78,14 @@ If user confirms, create `Daily/YYYY-MM-DD.md` in Obsidian vault with:
 - `icalbuddy eventsToday` - calendar events
 - `mcp__things__get_today` - today's tasks
 - `mcp__things__get_inbox` - inbox items
-- `mcp__unblocked__data_retrieval` or `mcp__unblocked__unblocked_context_engine` - find RFDs:
-  - Recently updated RFDs that need attention
-  - RFDs where Jake Huggart is mentioned (reviewer, author, or tagged)
 - `WebFetch` - fetch Escape Collective RSS feed:
-  - URL: `<RSS_URL_REDACTED>`
+  - Read the feed URL from `~/.claude/secrets/escape-collective-rss-url` (a single line containing the full URL with auth params)
+  - If the file is missing or empty, tell the user: "Create `~/.claude/secrets/escape-collective-rss-url` with your personal Escape Collective RSS URL (chmod 600), then re-run." Skip this step for now.
   - Parse XML to extract recent article titles, authors, and descriptions
   - Show articles not older than 3 days
-- `mcp__claude_ai_Gmail__gmail_search_messages` - search for latest Indivisible action email:
+- `mcp__claude_ai_Gmail__search_threads` - find latest Indivisible action thread:
   - Query: `from:action@birminghamindivisible.org` (most recent 1 result)
-- `mcp__claude_ai_Gmail__gmail_read_message` - read the full email and extract:
+- `mcp__claude_ai_Gmail__get_thread` - read the full thread and extract:
   - Action items and calls to action
   - Key dates or deadlines
   - Links to take action
