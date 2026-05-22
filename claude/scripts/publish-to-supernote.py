@@ -77,15 +77,37 @@ def load_credentials_config() -> dict[str, str]:
     return cfg
 
 
+def strip_frontmatter(text: str) -> str:
+    """Drop a leading YAML frontmatter block (--- ... ---).
+
+    The vault's daily-note frontmatter is not strictly valid YAML — an
+    unquoted `creation date` whose time contains a colon, `[[wikilink]]`
+    tags — so pandoc's metadata parser rejects it. It isn't needed in the
+    tablet PDF, so strip it before converting.
+    """
+    lines = text.splitlines(keepends=True)
+    if not lines or lines[0].rstrip("\n") != "---":
+        return text
+    for i in range(1, len(lines)):
+        if lines[i].rstrip("\n") == "---":
+            return "".join(lines[i + 1:]).lstrip("\n")
+    return text
+
+
 def convert_to_pdf(src: Path, pdf: Path) -> None:
     if shutil.which("pandoc") is None:
         die("pandoc is not installed — run setup.sh")
     print(f"Converting {src.name} to PDF...")
+    # Convert a frontmatter-stripped copy: the vault's daily-note YAML is not
+    # strictly valid and crashes pandoc's metadata parser. The copy lives
+    # beside the PDF in the caller's temp dir.
+    sanitized = pdf.parent / f"{src.stem}.md"
+    sanitized.write_text(strip_frontmatter(src.read_text()))
     # -task_lists: render `- [ ]` as literal text — typst's default font has
     #   no ballot-box glyph. wikilinks_*: render Obsidian [[links]] as plain text.
     result = subprocess.run(
         [
-            "pandoc", str(src), "-o", str(pdf),
+            "pandoc", str(sanitized), "-o", str(pdf),
             "--pdf-engine=typst",
             "-f", "markdown-task_lists+wikilinks_title_after_pipe",
         ],
