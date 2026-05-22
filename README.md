@@ -81,6 +81,7 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 | `cpprs` | Commit, push, open PR, watch Actions, deploy to staging |
 | `merge` | Merge current branch's PR to main |
 | `daily` | Daily startup workflow |
+| `organize-daily-notes` | File past months' daily notes into `Daily/YYYY/MM-Month` folders |
 | `setup-personal-proj` | Scaffold Cloudflare MCP permissions for a personal project |
 
 **Tmux window highlighting:**
