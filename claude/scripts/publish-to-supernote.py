@@ -104,12 +104,15 @@ def convert_to_pdf(src: Path, pdf: Path) -> None:
     sanitized = pdf.parent / f"{src.stem}.md"
     sanitized.write_text(strip_frontmatter(src.read_text()))
     # -task_lists: render `- [ ]` as literal text — typst's default font has
-    #   no ballot-box glyph. wikilinks_*: render Obsidian [[links]] as plain text.
+    #   no ballot-box glyph. -citations: don't treat `@handle` (e.g. a YouTube
+    #   URL like .../@BHMIndivisible) as a citation — that emits a typst #cite()
+    #   and fails with "document does not contain a bibliography".
+    #   wikilinks_*: render Obsidian [[links]] as plain text.
     result = subprocess.run(
         [
             "pandoc", str(sanitized), "-o", str(pdf),
             "--pdf-engine=typst",
-            "-f", "markdown-task_lists+wikilinks_title_after_pipe",
+            "-f", "markdown-task_lists-citations+wikilinks_title_after_pipe",
         ],
         capture_output=True, text=True,
     )
