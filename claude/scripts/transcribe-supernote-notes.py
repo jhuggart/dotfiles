@@ -31,6 +31,10 @@ the same date apart. If two notes in the same folder still share a date, the
 note's own name is appended — `...-notes (Name).md` — so neither overwrites the
 other.
 
+Each transcription gets YAML frontmatter: `creation date` (the note's last
+edit), `tags: [[supernote]] <year>`, and `source` (the note's path under the
+Supernote folder).
+
 noted.md (`notedmd`, installed via Homebrew) does the OCR/transcription using
 whichever provider you configured with `notedmd config` (Gemini, by default
 here). `.note` is Supernote's proprietary format, which noted.md cannot read, so
@@ -85,6 +89,27 @@ def note_date(src: Path) -> str:
     Drive's modifiedTime — i.e. when the note was last written on the device.
     """
     return datetime.fromtimestamp(src.stat().st_mtime).strftime("%Y-%m-%d")
+
+
+def build_frontmatter(src: Path, source_dir: Path) -> str:
+    """YAML frontmatter prepended to each transcription.
+
+    Follows the vault convention (`creation date`, `tags`) but tags the note
+    [[supernote]] to set transcriptions apart from daily reports, and records
+    the source path (relative to the Supernote folder) for provenance.
+    """
+    dt = datetime.fromtimestamp(src.stat().st_mtime)
+    try:
+        source = src.relative_to(source_dir).as_posix()
+    except ValueError:
+        source = src.name
+    return (
+        "---\n"
+        f"creation date: {dt.strftime('%Y-%m-%d %H:%M')}\n"
+        f"tags: [[supernote]] {dt.year}\n"
+        f"source: {source}\n"
+        "---\n\n"
+    )
 
 
 def build_targets(candidates: list[Path]) -> dict[Path, str]:
@@ -153,11 +178,12 @@ def run_notedmd(src: Path, dest_dir: Path) -> None:
         raise RuntimeError(detail or f"notedmd exited {result.returncode}")
 
 
-def transcribe(src: Path, target: Path, tmp: Path) -> None:
+def transcribe(src: Path, target: Path, tmp: Path, frontmatter: str) -> None:
     """Transcribe one source file to `target`, overwriting it atomically.
 
-    notedmd renders into a fresh temp dir; only after it succeeds do we move the
-    result over `target`, so a failed run never clobbers an existing .md.
+    notedmd renders into a fresh temp dir; we prepend `frontmatter` to its
+    output and only then move the result over `target`, so a failed run never
+    clobbers an existing .md.
     """
     out_dir = Path(tempfile.mkdtemp(dir=tmp))
     if src.suffix.lower() == NOTE_EXT:
@@ -169,7 +195,9 @@ def transcribe(src: Path, target: Path, tmp: Path) -> None:
     produced = out_dir / f"{src.stem}.md"
     if not produced.is_file():
         raise RuntimeError(f"notedmd did not produce {produced.name}")
-    shutil.move(str(produced), str(target))
+    final = out_dir / "final.md"
+    final.write_text(frontmatter + produced.read_text())
+    shutil.move(str(final), str(target))
 
 
 def main() -> None:
@@ -210,7 +238,7 @@ def main() -> None:
             verb = "Re-transcribing" if target.exists() else "Transcribing"
             print(f"{verb} {src.name} -> {target.name} ...")
             try:
-                transcribe(src, target, tmp)
+                transcribe(src, target, tmp, build_frontmatter(src, source_dir))
                 transcribed.append(target.name)
             except Exception as err:  # noqa: BLE001 - report and keep going
                 print(f"  failed: {err}", file=sys.stderr)
