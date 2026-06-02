@@ -17,7 +17,11 @@ vault's Daily/ folder. It is the automated half of the `daily` skill's step 6.
 
 Pipeline:
   <name>.note            --supernotelib--> temp <name>.pdf --notedmd--> Daily/<date>-<folder>-notes.md
-  <name>.png/.jpg/.pdf   ----------------(direct)--------- --notedmd--> Daily/<date>-<folder>-notes.md
+  <name>.png/.jpg/.jpeg  ----------------(direct)--------- --notedmd--> Daily/<date>-<folder>-notes.md
+
+Source PDFs are skipped on purpose: publish-to-supernote drops published
+daily-note PDFs into this same tree, so transcribing them would round-trip a
+note you already have as clean Markdown.
 
 Output is named `YYYY-MM-DD-<folder>-notes.md`, matching the vault's daily notes
 (`YYYY-MM-DD.md`) with the note's immediate parent folder and a `-notes` suffix.
@@ -63,7 +67,10 @@ DEFAULT_DEST = Path(
     "/Documents/Obsidian/Daily"
 )
 NOTE_EXT = ".note"
-IMAGE_EXTS = {".png", ".jpg", ".jpeg", ".pdf"}
+# Source images handed straight to notedmd. PDFs are intentionally excluded:
+# publish-to-supernote drops published daily-note PDFs into the Note tree, and
+# transcribing those back would round-trip notes already in the vault.
+IMAGE_EXTS = {".png", ".jpg", ".jpeg"}
 
 
 def die(msg: str) -> None:
