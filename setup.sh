@@ -47,6 +47,11 @@ brew install uv
 brew install pandoc
 brew install typst
 
+# noted.md: transcribes Supernote notes to Markdown (used by the daily skill).
+# After install, configure a provider once: `notedmd config --edit` (Gemini).
+brew tap tejas-raskar/noted.md
+brew install notedmd
+
 # Install Node via nvm
 export NVM_DIR="$HOME/.nvm"
 [ -s "$(brew --prefix)/opt/nvm/nvm.sh" ] && \. "$(brew --prefix)/opt/nvm/nvm.sh"
@@ -125,6 +130,7 @@ link_file "$DOTFILES_DIR/claude/scripts/notify-waiting.sh" ~/.claude/scripts/not
 link_file "$DOTFILES_DIR/claude/scripts/notify-done.sh" ~/.claude/scripts/notify-done.sh
 link_file "$DOTFILES_DIR/claude/scripts/qrspi-utils.sh" ~/.claude/scripts/qrspi-utils.sh
 link_file "$DOTFILES_DIR/claude/scripts/publish-to-supernote.py" ~/.claude/scripts/publish-to-supernote.py
+link_file "$DOTFILES_DIR/claude/scripts/transcribe-supernote-notes.py" ~/.claude/scripts/transcribe-supernote-notes.py
 
 # claude code global CLAUDE.md
 link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
