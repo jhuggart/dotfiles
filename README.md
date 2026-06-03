@@ -99,6 +99,7 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 - eza
 - zoxide
 - nvm
+- mise (runtime version manager; `.zshrc` activates it, and it reads per-project `.tool-versions`/`.ruby-version`)
 - ripgrep
 - go
 - terminal-notifier
