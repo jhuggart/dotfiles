@@ -39,6 +39,7 @@ brew install zsh-syntax-highlighting
 brew install fzf
 brew install eza
 brew install nvm
+brew install mise
 brew install ripgrep
 brew install go
 brew install zoxide
