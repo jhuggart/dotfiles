@@ -68,7 +68,7 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 
 **Auto-completion:** Full LSP-powered completion with nvim-cmp. Use `Tab`/`S-Tab` to navigate, `Enter` to confirm, `Ctrl+Space` to trigger manually.
 
-**LSP support:** Go (gopls) and TypeScript (typescript-language-server).
+**LSP support:** Go (gopls), TypeScript (typescript-language-server), and Ruby (ruby-lsp, including ERB). Ruby files auto-format with RuboCop on save when the project has it configured. ruby-lsp launches via `mise x -- ruby-lsp`, so it uses each project's Ruby. For Rails-aware features, add `ruby-lsp-rails` to the project's `Gemfile`; a project pinned to a Ruby without ruby-lsp installed needs it added to that project's bundle.
 
 ### Claude Code
 
