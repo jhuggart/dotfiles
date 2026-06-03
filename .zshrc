@@ -66,6 +66,9 @@ zstyle ':completion:*:descriptions' format '%F{yellow}── %d ──%f'
 # zoxide (smart cd replacement)
 command -v zoxide &> /dev/null && eval "$(zoxide init zsh)"
 
+# mise (runtime version manager - reads .ruby-version/.tool-versions)
+command -v mise &> /dev/null && eval "$(mise activate zsh)"
+
 # ─────────────────────────────────────────────────────────────
 # eza (modern ls replacement)
 # ─────────────────────────────────────────────────────────────
