@@ -63,6 +63,13 @@ nvm use --lts
 go install golang.org/x/tools/gopls@latest
 npm install -g typescript typescript-language-server
 
+# Ruby: ruby-lsp runs in each project's mise-managed Ruby (nvim launches
+# it via `mise x -- ruby-lsp`). Install it into a global Ruby here.
+# `mise exec` is used because this non-interactive shell hasn't activated
+# mise's shims, so a bare `gem` would not resolve to mise's Ruby.
+mise use -g ruby@latest
+mise exec -- gem install ruby-lsp
+
 # Set up fzf key bindings
 yes | $(brew --prefix)/opt/fzf/install --key-bindings --completion --no-bash --no-fish --no-update-rc
 
