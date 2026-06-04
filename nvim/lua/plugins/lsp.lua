@@ -26,7 +26,25 @@ return {
       capabilities = capabilities,
     })
 
+    -- Ruby: launch ruby-lsp in the project's mise-managed Ruby context
+    -- so it resolves the right Ruby version and bundler environment.
+    vim.lsp.config("ruby_lsp", {
+      cmd = { "mise", "x", "--", "ruby-lsp" },
+    })
+
     -- Enable LSP servers (configs provided by nvim-lspconfig)
-    vim.lsp.enable({ "gopls", "ts_ls" })
+    vim.lsp.enable({ "gopls", "ts_ls", "ruby_lsp" })
+
+    -- Format Ruby files on save via ruby-lsp (RuboCop/syntax_tree).
+    -- Gated on the `ruby` filetype so it also covers Gemfile/Rakefile/*.rake/*.gemspec.
+    -- No-op when the project has no formatter configured, so it is safe by default.
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = "*",
+      callback = function()
+        if vim.bo.filetype == "ruby" then
+          vim.lsp.buf.format()
+        end
+      end,
+    })
   end,
 }
