@@ -67,6 +67,9 @@ npm install -g typescript typescript-language-server
 # it via `mise x -- ruby-lsp`). Install it into a global Ruby here.
 # `mise exec` is used because this non-interactive shell hasn't activated
 # mise's shims, so a bare `gem` would not resolve to mise's Ruby.
+# Use precompiled binaries — Ruby 4.x compilation from source fails on macOS
+# due to psych extension issues with the bundled libyaml.
+mise settings ruby.compile=false
 mise use -g ruby@latest
 mise exec -- gem install ruby-lsp
 
