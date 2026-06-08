@@ -19,7 +19,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jake/.claude/scripts/notify-waiting.sh"
+            "command": "$HOME/.claude/scripts/notify-waiting.sh"
           }
         ]
       }
@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "/Users/jake/.claude/scripts/notify-done.sh"
+            "command": "$HOME/.claude/scripts/notify-done.sh"
           }
         ]
       }

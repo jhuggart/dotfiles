@@ -73,7 +73,7 @@ Ready to create daily note? (Daily/{date}.md)
 ## Daily Note
 
 If user confirms, create `Daily/YYYY-MM-DD.md` in the Obsidian vault
-(`/Users/jake/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/Daily/`)
+(`$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/Daily/`)
 following the Output Format structure, with the Escape Collective section
 expanded to a concise summary and visible article URL per item:
 - Frontmatter with date and tags

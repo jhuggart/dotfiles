@@ -90,4 +90,4 @@ if [[ -f ~/.env.local ]]; then
 fi
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 # CF CLI completions
-[[ -f "/Users/jake/.config/cf/completions/_cf.zsh" ]] && source "/Users/jake/.config/cf/completions/_cf.zsh"
+[[ -f "$HOME/.config/cf/completions/_cf.zsh" ]] && source "$HOME/.config/cf/completions/_cf.zsh"

@@ -66,10 +66,7 @@ import supernotelib as sn
 from supernotelib.converter import ImageConverter
 
 SOURCE_DIR_FILE = Path.home() / ".claude" / "secrets" / "supernote-notes-dir"
-DEFAULT_DEST = Path(
-    "/Users/jake/Library/Mobile Documents/iCloud~md~obsidian"
-    "/Documents/Obsidian/Daily"
-)
+DEFAULT_DEST = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/Daily"
 NOTE_EXT = ".note"
 # Source images handed straight to notedmd. PDFs are intentionally excluded:
 # publish-to-supernote drops published daily-note PDFs into the Note tree, and
