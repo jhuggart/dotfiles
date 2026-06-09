@@ -17,8 +17,9 @@ digraph daily {
     "3. Check Things Inbox" -> "4. Escape Collective feed";
     "4. Escape Collective feed" -> "5. Indivisible daily action";
     "5. Indivisible daily action" -> "6. Transcribe Supernote notes";
-    "6. Transcribe Supernote notes" -> "7. Summarize & prompt";
-    "7. Summarize & prompt" -> "8. Create & publish daily note";
+    "6. Transcribe Supernote notes" -> "7. Capture Supernote TODOs";
+    "7. Capture Supernote TODOs" -> "8. Summarize & prompt";
+    "8. Summarize & prompt" -> "9. Create & publish daily note";
 }
 ```
 
@@ -30,8 +31,9 @@ digraph daily {
 4. **Escape Collective** - Read RSS feed URL from `~/.claude/secrets/escape-collective-rss-url`. If the file is missing or empty, prompt the user to create it (single line containing their personal feed URL) and skip this step. Otherwise fetch the feed with `curl` (the member feed returns HTTP 403 to WebFetch's crawler, so use `curl -s -A 'Mozilla/5.0' "$(cat ~/.claude/secrets/escape-collective-rss-url)"` and parse the XML). In the on-screen summary, show title, author, and a one-line summary per article. In the daily note, include title, author, a concise summary (a few sentences), and the full article URL as visible text so it can be opened from the tablet or Obsidian
 5. **Indivisible Daily Action** - Search Gmail threads for the most recent thread from `action@birminghamindivisible.org`, read it, and summarize the action items
 6. **Transcribe Supernote Notes** - Run `~/.claude/scripts/transcribe-supernote-notes.py` to turn new or updated Supernote notes (synced to the local Google Drive folder) into Markdown in `Daily/`. Output is named `YYYY-MM-DD-<folder>-notes.md` to match the daily notes — the date is the note's last edit, `<folder>` is the note's parent folder (which keeps same-date notes from different folders apart), and the note's name is appended when two notes in the same folder share a date. Each transcription is written with YAML frontmatter (`creation date`, `tags: [[supernote]] <year>`, `source`). The script renders `.note` files to PDF via `supernotelib`, then noted.md (`notedmd`, transcribing with Gemini) handles them; PNG/JPG exports are transcribed directly. Source PDFs are skipped (publish-to-supernote's published daily-note PDFs sync into this same tree, and re-transcribing those would round-trip notes already in the vault). A note is (re)transcribed whenever its source is newer than the existing `.md` (overwriting it); ones already up to date are skipped. Report which notes were transcribed (source name + `Daily/YYYY-MM-DD-<folder>-notes.md`), then still prompt the user about anything the tablet hasn't synced yet. If the script reports a missing config or `notedmd` isn't set up, relay its instructions (see README one-time setup)
-7. **Summarize** - Present overview and offer to create daily note
-8. **Publish** - After the daily note is created, offer to publish it to the Supernote tablet
+7. **Capture Supernote TODOs** - Scan each markdown file that was newly transcribed in step 6 for lines containing `#todo` or `TODO:` (case-insensitive match on the marker). For each matching line, strip the marker and any leading whitespace/punctuation to extract the task title, then add it to the Things inbox via `mcp__things__add_todo`. If no todos are found, note that. Report each captured item with the source note file and the task text sent to Things. (Scanning only newly-transcribed files prevents duplicate todos on subsequent daily runs.)
+8. **Summarize** - Present overview and offer to create daily note
+9. **Publish** - After the daily note is created, offer to publish it to the Supernote tablet
 
 ## Output Format
 
@@ -65,6 +67,10 @@ Present a clean summary:
 - Transcribed: Work/Meeting Notes.note → Daily/2026-05-31-Work-notes.md
 - (or) No new notes to transcribe
 Anything the tablet hasn't synced yet that you took on paper? (meetings, conversations, ideas)
+
+### Supernote TODOs → Things Inbox
+- Added: "Review quarterly goals" (from Daily/2026-06-08-Note-notes.md)
+- (or) No todos found in today's notes
 
 ---
 Ready to create daily note? (Daily/{date}.md)
@@ -120,6 +126,10 @@ the token is rejected, the script prints what to do; relay it to the user.
   - Names output `Daily/YYYY-MM-DD-<folder>-notes.md` (date = the note's last-modified day, `<folder>` = its parent folder; the note name is appended when two notes in the same folder share a date), matching the vault's daily notes
   - (Re)transcribes when the source is newer than its `.md` and overwrites it; skips notes already up to date. Writes atomically, so a failed run leaves any existing `.md` intact
   - Requires a one-time `notedmd` setup (Homebrew install + `notedmd config`); see README. If the script reports `notedmd` is missing or unconfigured, relay its instructions
+- `mcp__things__add_todo` - add a captured todo to the Things inbox:
+  - Called once per matching line found in step 7
+  - Pass the extracted task text as the `title` parameter
+  - No list/project needed — defaults to inbox
 - `mcp__claude_ai_Gmail__search_threads` - find latest Indivisible action thread:
   - Query: `from:action@birminghamindivisible.org` (most recent 1 result)
 - `mcp__claude_ai_Gmail__get_thread` - read the full thread and extract:
