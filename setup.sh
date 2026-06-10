@@ -47,6 +47,7 @@ brew install terminal-notifier
 brew install uv
 brew install pandoc
 brew install typst
+brew install tree-sitter-cli  # nvim-treesitter uses this to compile parsers
 
 # noted.md: transcribes Supernote notes to Markdown (used by the daily skill).
 # After install, configure a provider once: `notedmd config --edit` (Gemini).
