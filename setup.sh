@@ -43,6 +43,7 @@ brew install mise
 brew install ripgrep
 brew install go
 brew install zoxide
+brew install jq
 brew install terminal-notifier
 brew install uv
 brew install pandoc
