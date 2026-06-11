@@ -56,6 +56,17 @@ zstyle ':completion:*:descriptions' format '%F{yellow}── %d ──%f'
 [[ -f $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh ]] && \
   source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 
+# Tab: accept autosuggestion if one is showing, else do normal completion
+_tab_or_autosuggest() {
+  if [[ -n $POSTDISPLAY ]]; then
+    zle autosuggest-accept
+  else
+    zle expand-or-complete
+  fi
+}
+zle -N _tab_or_autosuggest
+bindkey '\t' _tab_or_autosuggest
+
 # Syntax highlighting (green = valid, red = invalid)
 [[ -f $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh ]] && \
   source $(brew --prefix)/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
