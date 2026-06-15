@@ -33,7 +33,7 @@ digraph daily {
 6. **Transcribe Supernote Notes** - Run `~/.claude/scripts/transcribe-supernote-notes.py` to turn new or updated Supernote notes (synced to the local Google Drive folder) into Markdown in `Daily/`. Output is named `YYYY-MM-DD-<folder>-notes.md` to match the daily notes — the date is the note's last edit, `<folder>` is the note's parent folder (which keeps same-date notes from different folders apart), and the note's name is appended when two notes in the same folder share a date. Each transcription is written with YAML frontmatter (`creation date`, `tags: [[supernote]] <year>`, `source`). The script renders `.note` files to PDF via `supernotelib`, then noted.md (`notedmd`, transcribing with Gemini) handles them; PNG/JPG exports are transcribed directly. Source PDFs are skipped (publish-to-supernote's published daily-note PDFs sync into this same tree, and re-transcribing those would round-trip notes already in the vault). A note is (re)transcribed whenever its source is newer than the existing `.md` (overwriting it); ones already up to date are skipped. Report which notes were transcribed (source name + `Daily/YYYY-MM-DD-<folder>-notes.md`), then still prompt the user about anything the tablet hasn't synced yet. If the script reports a missing config or `notedmd` isn't set up, relay its instructions (see README one-time setup)
 7. **Capture Supernote TODOs** - Scan each markdown file that was newly transcribed in step 6 for lines containing `#todo` or `TODO:` (case-insensitive match on the marker). For each matching line, strip the marker and any leading whitespace/punctuation to extract the task title, then add it to the Things inbox via `mcp__things__add_todo`. If no todos are found, note that. Report each captured item with the source note file and the task text sent to Things. (Scanning only newly-transcribed files prevents duplicate todos on subsequent daily runs.)
 8. **Summarize** - Present overview and offer to create daily note
-9. **Publish** - After the daily note is created, offer to publish it to the Supernote tablet
+9. **Publish** - After the daily note is created, automatically publish it to the Supernote tablet (no prompt)
 
 ## Output Format
 
@@ -91,8 +91,7 @@ expanded to a concise summary and visible article URL per item:
 
 ## Publish to Supernote
 
-After the note is created, ask: "Publish today's note to your Supernote? [y/N]"
-If the user confirms, run:
+After the note is created, automatically publish it (no prompt) by running:
 
 ```
 ~/.claude/scripts/publish-to-supernote.py "<path to the daily note just created>"
