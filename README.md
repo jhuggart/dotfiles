@@ -85,6 +85,11 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 | `setup-personal-proj` | Scaffold Cloudflare MCP permissions for a personal project |
 | `use-spark` | Query Spark Mail — emails, calendar, contacts, meetings |
 
+**Keybindings:**
+| Keys | Action |
+|------|--------|
+| `Ctrl+Q` | Cancel/interrupt (`chat:cancel`) — needed in vim editor mode, where `Esc` switches INSERT/NORMAL instead of cancelling |
+
 **Tmux window highlighting:**
 - Yellow - Claude is waiting for input
 - Green - Claude has finished

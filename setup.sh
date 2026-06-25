@@ -148,6 +148,9 @@ link_file "$DOTFILES_DIR/claude/scripts/transcribe-supernote-notes.py" ~/.claude
 # claude code global CLAUDE.md
 link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
 
+# claude code keybindings (symlink — no runtime state, unlike settings.json)
+link_file "$DOTFILES_DIR/claude/keybindings.json" ~/.claude/keybindings.json
+
 # claude code skills
 mkdir -p ~/.claude/skills
 for skill_dir in "$DOTFILES_DIR/claude/skills"/*/; do
