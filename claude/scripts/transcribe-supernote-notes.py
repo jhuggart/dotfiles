@@ -13,39 +13,44 @@
 The Supernote tablet syncs its notes to Google Drive, and Google Drive for
 Desktop mirrors that folder to a local path on this Mac. This script walks that
 local folder, turns each new or updated note into Markdown, and drops it in the
-vault's Daily/ folder. It is the automated half of the `daily` skill's step 6.
+vault's Daily/ folder. It is the automated half of the `daily` skill's step 5.
 
 Pipeline:
-  <name>.note            --supernotelib--> temp <name>.pdf --notedmd--> Daily/<date>-<folder>-notes.md
-  <name>.png/.jpg/.jpeg  ----------------(direct)--------- --notedmd--> Daily/<date>-<folder>-notes.md
+  <name>.note            --supernotelib--> temp <name>.pdf --notedmd--> body
+  <name>.png/.jpg/.jpeg  ----------------(direct)--------- --notedmd--> body
 
 Source PDFs are skipped on purpose: publish-to-supernote drops published
 daily-note PDFs into this same tree, so transcribing them would round-trip a
 note you already have as clean Markdown.
 
-Output is named `YYYY-MM-DD-<folder>-notes.md`, matching the vault's daily notes
-(`YYYY-MM-DD.md`) with the note's immediate parent folder and a `-notes` suffix.
-<date> is the note's last-modified day (which Google Drive for Desktop mirrors
-from Drive's modifiedTime), and <folder> keeps notes from different folders on
-the same date apart. If two notes in the same folder still share a date, the
-note's own name is appended — `...-notes (Name).md` — so neither overwrites the
-other.
+Output: all notes sharing a (date, folder) are combined into one
+`YYYY-MM-DD-<folder>-notes.md`, matching the vault's daily notes (`YYYY-MM-DD.md`)
+with the note's immediate parent folder and a `-notes` suffix. Each note becomes
+a `## HH:MM` section (its file name when no time is known) in chronological order.
 
-Each transcription gets YAML frontmatter: `creation date` (the note's last
-edit), `tags: [[supernote]] <year>`, and `source` (the note's path under the
-Supernote folder).
+<date> is the note's own date, not its mtime. For a `.note` it comes from the
+embedded FILE_ID (`F<YYYYMMDDHHMMSS>...`, set when the note was created on the
+device); failing that, a YYYYMMDD stamp in the file name; failing that, the file
+mtime. Images carry no metadata, so they use the file name then mtime. mtime is
+avoided as the primary source because Google Drive for Desktop sets it to the
+sync time, which can trail the real note date by days.
+
+Each combined file gets YAML frontmatter: `creation date` (the earliest member's
+timestamp), `tags: [[supernote]] <year>`, and `source` (a list of every note
+that fed the file, each relative to the Supernote folder).
 
 noted.md (`notedmd`, installed via Homebrew) does the OCR/transcription using
 whichever provider you configured with `notedmd config` (Gemini, by default
 here). `.note` is Supernote's proprietary format, which noted.md cannot read, so
 those are rendered to a multi-page PDF with supernotelib first.
 
-A note is (re)transcribed whenever the source file is newer than its existing
-Daily/<date>-<folder>-notes.md (and always the first time, when no .md exists yet); an
-unchanged note is left alone. Re-transcribing OVERWRITES that file, so if you
-edit a transcription in Obsidian and later add to the same note on the device,
-the next run replaces your edits. The write is atomic: notedmd renders into a
-temp dir first, so a failed run never clobbers an existing .md.
+A combined file is rebuilt whenever any member note is newer than it (and always
+the first time, when the file doesn't exist yet); when nothing changed it is left
+alone. Rebuilding re-transcribes every member of that group, not just the one
+that changed. The write is atomic: the combined note is assembled in a temp dir
+and moved into place, so a failed run never clobbers an existing file. If a
+single member fails to transcribe, its section carries an inline warning and the
+rest are still written; if every member fails, the file is left untouched.
 
 Usage:
   transcribe-supernote-notes.py [source-dir] [dest-dir]
@@ -54,11 +59,11 @@ Usage:
 ~/.claude/secrets/supernote-notes-dir; `dest-dir` defaults to the vault Daily/
 folder. uv resolves supernotelib (and its Pillow dependency) automatically.
 """
+import re
 import shutil
 import subprocess
 import sys
 import tempfile
-from collections import Counter
 from datetime import datetime
 from pathlib import Path
 
@@ -79,55 +84,90 @@ def die(msg: str) -> None:
     sys.exit(1)
 
 
-def note_date(src: Path) -> str:
-    """The note's last-updated day as YYYY-MM-DD.
+def note_timestamp(src: Path) -> tuple[datetime, bool]:
+    """The note's own date/time, and whether a precise clock time was found.
 
-    Uses the file's modified time, which Google Drive for Desktop mirrors from
-    Drive's modifiedTime — i.e. when the note was last written on the device.
+    The datetime drives both the group key (its YYYY-MM-DD) and the per-note
+    section heading; the bool is True only when a real time was recovered, so the
+    heading can show HH:MM instead of the file name.
+
+    Precedence, most authoritative first:
+      1. A .note's embedded FILE_ID (`F<YYYYMMDDHHMMSS>...`) — when the note was
+         created on the device. This is the "date in the note".
+      2. A YYYYMMDD stamp in the file name (Supernote's default note names, and
+         the only date image exports carry).
+      3. The file mtime — last resort; Google Drive for Desktop sets this to the
+         sync time, which can trail the real note date by days.
+
+    `.note` files are loaded here and again in note_to_pdf during render. With a
+    handful of notes the double parse is negligible; cache Notebook objects in
+    main() if it ever matters.
     """
-    return datetime.fromtimestamp(src.stat().st_mtime).strftime("%Y-%m-%d")
+    if src.suffix.lower() == NOTE_EXT:
+        try:
+            file_id = sn.load_notebook(str(src), policy="loose").get_fileid()
+            if file_id:
+                m = re.match(r"F(\d{14})", file_id)
+                if m:
+                    return datetime.strptime(m.group(1), "%Y%m%d%H%M%S"), True
+        except Exception:  # noqa: BLE001 - corrupt note: fall back to name/mtime
+            pass
+    m = re.search(r"(\d{8})", src.stem)
+    if m:
+        try:
+            return datetime.strptime(m.group(1), "%Y%m%d"), False
+        except ValueError:
+            pass
+    return datetime.fromtimestamp(src.stat().st_mtime), False
 
 
-def build_frontmatter(src: Path, source_dir: Path) -> str:
-    """YAML frontmatter prepended to each transcription.
-
-    Follows the vault convention (`creation date`, `tags`) but tags the note
-    [[supernote]] to set transcriptions apart from daily reports, and records
-    the source path (relative to the Supernote folder) for provenance.
-    """
-    dt = datetime.fromtimestamp(src.stat().st_mtime)
+def rel_source(src: Path, source_dir: Path) -> str:
+    """Path of a source note relative to the Supernote folder (for provenance)."""
     try:
-        source = src.relative_to(source_dir).as_posix()
+        return src.relative_to(source_dir).as_posix()
     except ValueError:
-        source = src.name
-    return (
-        "---\n"
-        f"creation date: {dt.strftime('%Y-%m-%d %H:%M')}\n"
-        f"tags: [[supernote]] {dt.year}\n"
-        f"source: {source}\n"
-        "---\n\n"
-    )
+        return src.name
 
 
-def build_targets(candidates: list[Path]) -> dict[Path, str]:
-    """Map each source file to its Daily/ filename.
+def group_sources(
+    candidates: list[Path],
+) -> dict[tuple[str, str], list[tuple[Path, datetime, bool]]]:
+    """Group sources into one output file per (date, folder).
 
-    Named `YYYY-MM-DD-<folder>-notes.md`, matching the vault's daily notes
-    (`YYYY-MM-DD.md`) with the note's immediate parent folder and a `-notes`
-    suffix — the folder keeps notes from different folders on the same date
-    apart. If two notes in the *same* folder still share a date, the note's own
-    name is appended so neither overwrites the other: `...-notes (Name).md`.
+    The date is the note's own date (see note_timestamp); the folder is the
+    note's immediate parent. Every note sharing a (date, folder) is merged into a
+    single `YYYY-MM-DD-<folder>-notes.md`. Members are sorted chronologically so
+    the combined file reads top-to-bottom in the order the notes were taken.
     """
-    keys = [(note_date(s), s.parent.name) for s in candidates]
-    counts = Counter(keys)
-    targets: dict[Path, str] = {}
-    for src, (date, folder) in zip(candidates, keys):
-        base = f"{date}-{folder}-notes"
-        if counts[(date, folder)] > 1:
-            targets[src] = f"{base} ({src.stem}).md"
-        else:
-            targets[src] = f"{base}.md"
-    return targets
+    groups: dict[tuple[str, str], list[tuple[Path, datetime, bool]]] = {}
+    for src in candidates:
+        dt, has_time = note_timestamp(src)
+        key = (dt.strftime("%Y-%m-%d"), src.parent.name)
+        groups.setdefault(key, []).append((src, dt, has_time))
+    for members in groups.values():
+        members.sort(key=lambda m: m[1])
+    return groups
+
+
+def build_group_frontmatter(
+    members: list[tuple[Path, datetime, bool]], date: str, source_dir: Path
+) -> str:
+    """YAML frontmatter for a combined day's note.
+
+    `creation date` is the earliest member's timestamp (members are pre-sorted).
+    `source` lists every note that fed the file. Tagged [[supernote]] to set
+    transcriptions apart from daily reports.
+    """
+    earliest = members[0][1]
+    lines = [
+        "---",
+        f"creation date: {earliest.strftime('%Y-%m-%d %H:%M')}",
+        f"tags: [[supernote]] {date[:4]}",
+        "source:",
+    ]
+    lines += [f"  - {rel_source(src, source_dir)}" for src, _, _ in members]
+    lines += ["---", "", ""]
+    return "\n".join(lines)
 
 
 def read_source_dir() -> Path:
@@ -175,12 +215,11 @@ def run_notedmd(src: Path, dest_dir: Path) -> None:
         raise RuntimeError(detail or f"notedmd exited {result.returncode}")
 
 
-def transcribe(src: Path, target: Path, tmp: Path, frontmatter: str) -> None:
-    """Transcribe one source file to `target`, overwriting it atomically.
+def transcribe_body(src: Path, tmp: Path) -> str:
+    """Transcribe one source file and return its Markdown body (no frontmatter).
 
-    notedmd renders into a fresh temp dir; we prepend `frontmatter` to its
-    output and only then move the result over `target`, so a failed run never
-    clobbers an existing .md.
+    notedmd renders into a fresh temp dir; we read and return that text so the
+    caller can stitch several notes into one combined file.
     """
     out_dir = Path(tempfile.mkdtemp(dir=tmp))
     if src.suffix.lower() == NOTE_EXT:
@@ -192,8 +231,19 @@ def transcribe(src: Path, target: Path, tmp: Path, frontmatter: str) -> None:
     produced = out_dir / f"{src.stem}.md"
     if not produced.is_file():
         raise RuntimeError(f"notedmd did not produce {produced.name}")
-    final = out_dir / "final.md"
-    final.write_text(frontmatter + produced.read_text())
+    return produced.read_text()
+
+
+def format_section(dt: datetime, has_time: bool, src: Path, body: str) -> str:
+    """One note's section: an HH:MM heading (or its name) above the transcription."""
+    heading = dt.strftime("%H:%M") if has_time else src.stem
+    return f"## {heading}\n\n{body.strip()}\n"
+
+
+def write_group(target: Path, frontmatter: str, sections: list[str], tmp: Path) -> None:
+    """Write the combined note atomically: assemble in tmp, then move over target."""
+    final = Path(tempfile.mkdtemp(dir=tmp)) / "final.md"
+    final.write_text(frontmatter + "\n".join(sections))
     shutil.move(str(final), str(target))
 
 
@@ -223,30 +273,52 @@ def main() -> None:
         print(f"No notes or images found under {source_dir}")
         return
 
-    targets = build_targets(candidates)
-    transcribed, uptodate, failed = [], [], []
+    groups = group_sources(candidates)
+    transcribed: list[tuple[str, list[str]]] = []
+    uptodate: list[str] = []
+    failed: list[str] = []
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
-        for src in candidates:
-            target = dest_dir / targets[src]
-            if target.exists() and target.stat().st_mtime >= src.stat().st_mtime:
-                uptodate.append(src.name)
+        for (date, folder), members in sorted(groups.items()):
+            target = dest_dir / f"{date}-{folder}-notes.md"
+            newest_src = max(src.stat().st_mtime for src, _, _ in members)
+            if target.exists() and target.stat().st_mtime >= newest_src:
+                uptodate.append(target.name)
                 continue
+            # Any member newer than the file rebuilds the whole group: notedmd
+            # re-runs for every member, not just the one that changed. Fine for a
+            # personal daily workflow; revisit with per-source caching if needed.
             verb = "Re-transcribing" if target.exists() else "Transcribing"
-            print(f"{verb} {src.name} -> {target.name} ...")
-            try:
-                transcribe(src, target, tmp, build_frontmatter(src, source_dir))
-                transcribed.append(target.name)
-            except Exception as err:  # noqa: BLE001 - report and keep going
-                print(f"  failed: {err}", file=sys.stderr)
-                failed.append(src.name)
+            print(f"{verb} -> {target.name} ({len(members)} notes) ...")
+            sections: list[str] = []
+            any_ok = False
+            for src, dt, has_time in members:
+                try:
+                    body = transcribe_body(src, tmp)
+                    sections.append(format_section(dt, has_time, src, body))
+                    any_ok = True
+                except Exception as err:  # noqa: BLE001 - mark and keep going
+                    print(f"  failed: {src.name}: {err}", file=sys.stderr)
+                    failed.append(src.name)
+                    heading = dt.strftime("%H:%M") if has_time else src.stem
+                    sections.append(
+                        f"## {heading}\n\n> [!warning] Transcription failed for "
+                        f"`{rel_source(src, source_dir)}`: {err}\n"
+                    )
+            if any_ok:
+                frontmatter = build_group_frontmatter(members, date, source_dir)
+                write_group(target, frontmatter, sections, tmp)
+                transcribed.append((target.name, [src.name for src, _, _ in members]))
+            else:
+                # Every member failed — leave any existing good file untouched.
+                print(f"  skipped {target.name}: all notes failed", file=sys.stderr)
 
     print(
-        f"\nDone: {len(transcribed)} transcribed, "
-        f"{len(uptodate)} up to date, {len(failed)} failed."
+        f"\nDone: {len(transcribed)} files written, "
+        f"{len(uptodate)} up to date, {len(failed)} notes failed."
     )
-    if transcribed:
-        print("Transcribed: " + ", ".join(transcribed))
+    for name, sources in transcribed:
+        print(f"Transcribed: {name} (from {', '.join(sources)})")
     if failed:
         print("Failed: " + ", ".join(failed), file=sys.stderr)
         sys.exit(1)
