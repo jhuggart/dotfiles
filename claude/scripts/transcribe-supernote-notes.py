@@ -44,6 +44,14 @@ whichever provider you configured with `notedmd config` (Gemini, by default
 here). `.note` is Supernote's proprietary format, which noted.md cannot read, so
 those are rendered to a multi-page PDF with supernotelib first.
 
+notedmd makes one Gemini request per note. On the free tier gemini-2.5-flash is
+capped at ~10 requests/minute, and past that the API returns HTTP 429 while
+notedmd silently drops the note (exit 0, no output) — so a backlog of >10 notes
+used to lose everything after the tenth. Calls are therefore paced under the cap
+(MIN_CALL_INTERVAL seconds apart) and any note that still comes back empty is
+retried after RETRY_BACKOFF seconds, up to MAX_RETRIES times, to let the
+per-minute window clear. All three are overridable via SUPERNOTE_* env vars.
+
 A combined file is rebuilt whenever any member note is newer than it (and always
 the first time, when the file doesn't exist yet); when nothing changed it is left
 alone. Rebuilding re-transcribes every member of that group, not just the one
@@ -59,11 +67,13 @@ Usage:
 ~/.claude/secrets/supernote-notes-dir; `dest-dir` defaults to the vault Daily/
 folder. uv resolves supernotelib (and its Pillow dependency) automatically.
 """
+import os
 import re
 import shutil
 import subprocess
 import sys
 import tempfile
+import time
 from datetime import datetime
 from pathlib import Path
 
@@ -77,6 +87,20 @@ NOTE_EXT = ".note"
 # publish-to-supernote drops published daily-note PDFs into the Note tree, and
 # transcribing those back would round-trip notes already in the vault.
 IMAGE_EXTS = {".png", ".jpg", ".jpeg"}
+
+# notedmd sends one request per note to Gemini. On the free tier, gemini-2.5-flash
+# allows ~10 requests/minute; beyond that the API returns HTTP 429 and notedmd
+# silently drops the note (exit 0, no output file) — so a backlog of >10 notes
+# loses everything past the tenth. We pace calls to stay under the cap and retry
+# any that still slip through, waiting for the 1-minute window to clear. Override
+# via env vars if you're on a higher tier (set MIN_CALL_INTERVAL=0 to disable).
+# Pacing is the real fix — 7s apart is ~8.5 req/min, safely under 10 — so from a
+# fresh quota no note is ever throttled. The retry is only insurance: it waits a
+# FULL 60s window (a rejected request keeps the window saturated, so a shorter
+# wait can't recover) and gives up after 2 tries rather than thrash the limit.
+MIN_CALL_INTERVAL = float(os.environ.get("SUPERNOTE_MIN_CALL_INTERVAL", "7"))
+MAX_RETRIES = int(os.environ.get("SUPERNOTE_MAX_RETRIES", "2"))
+RETRY_BACKOFF = float(os.environ.get("SUPERNOTE_RETRY_BACKOFF", "60"))
 
 
 def die(msg: str) -> None:
@@ -234,6 +258,45 @@ def transcribe_body(src: Path, tmp: Path) -> str:
     return produced.read_text()
 
 
+class Pacer:
+    """Enforce a minimum interval between notedmd calls to respect the rate cap."""
+
+    def __init__(self, interval: float) -> None:
+        self.interval = interval
+        self._last: float | None = None
+
+    def wait(self) -> None:
+        if self.interval > 0 and self._last is not None:
+            remaining = self.interval - (time.monotonic() - self._last)
+            if remaining > 0:
+                time.sleep(remaining)
+        self._last = time.monotonic()
+
+
+def transcribe_with_retry(src: Path, tmp: Path, pacer: Pacer) -> str:
+    """transcribe_body, paced and retried to survive Gemini rate limits.
+
+    A throttled note comes back as "did not produce" (notedmd swallows the 429
+    and exits 0 with no file), so every failure is treated as retryable: wait
+    for the per-minute window to clear, then try again up to MAX_RETRIES times.
+    """
+    last_err: Exception | None = None
+    for attempt in range(MAX_RETRIES + 1):
+        pacer.wait()
+        try:
+            return transcribe_body(src, tmp)
+        except Exception as err:  # noqa: BLE001 - retry, then surface to caller
+            last_err = err
+            if attempt < MAX_RETRIES:
+                print(
+                    f"  {src.name}: no output on attempt {attempt + 1} ({err}); "
+                    f"waiting {RETRY_BACKOFF:.0f}s for the rate-limit window ...",
+                    file=sys.stderr,
+                )
+                time.sleep(RETRY_BACKOFF)
+    raise last_err
+
+
 def format_section(dt: datetime, has_time: bool, src: Path, body: str) -> str:
     """One note's section: an HH:MM heading (or its name) above the transcription."""
     heading = dt.strftime("%H:%M") if has_time else src.stem
@@ -277,6 +340,7 @@ def main() -> None:
     transcribed: list[tuple[str, list[str]]] = []
     uptodate: list[str] = []
     failed: list[str] = []
+    pacer = Pacer(MIN_CALL_INTERVAL)
     with tempfile.TemporaryDirectory() as tmpdir:
         tmp = Path(tmpdir)
         for (date, folder), members in sorted(groups.items()):
@@ -294,7 +358,7 @@ def main() -> None:
             any_ok = False
             for src, dt, has_time in members:
                 try:
-                    body = transcribe_body(src, tmp)
+                    body = transcribe_with_retry(src, tmp, pacer)
                     sections.append(format_section(dt, has_time, src, body))
                     any_ok = True
                 except Exception as err:  # noqa: BLE001 - mark and keep going
