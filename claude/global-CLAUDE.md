@@ -1,3 +1,4 @@
 - Prefer the gh cli for looking at anything in github
 - Write plans to .md files before executing, delete after entire plan has been completed and before final commit for that plan
+- Prefer working in git worktrees. Never make changes directly in the main/root checkout — if not already in a worktree, always create a new worktree first and switch to it before making changes
 - Be sure to include current worktree in plans AND when generating a new plan be certain to include an instruction to perform the work in current worktree
