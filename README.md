@@ -95,6 +95,9 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 - Green - Claude has finished
 - Highlighting only appears on background windows and clears when focused
 
+**Statusline:**
+Shows `model in dir on branch`, then the session's dollar cost and the percentage of the model's context window consumed, each with a Nerd Font icon. The context percentage is model-aware — 1M tokens for current Opus/Sonnet/Fable models, 200K for Haiku. Cost comes from the JSON Claude Code pipes to the status command; token usage is read from the session transcript.
+
 ### Tools Installed
 - neovim
 - tmux (with TPM plugin manager)
