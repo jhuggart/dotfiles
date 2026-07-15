@@ -38,7 +38,7 @@
   },
   "statusLine": {
     "type": "command",
-    "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); git_branch=$(cd \"$cwd\" 2>/dev/null && git branch --show-current 2>/dev/null || echo ''); if [ -n \"$git_branch\" ]; then printf \"%s in %s on %s@%s\" \"$model\" \"$(basename \"$cwd\")\" \"$git_branch\" \"$(hostname -s)\"; else printf \"%s in %s@%s\" \"$model\" \"$(basename \"$cwd\")\" \"$(hostname -s)\"; fi"
+    "command": "input=$(cat); model=$(echo \"$input\" | jq -r '.model.display_name'); model_id=$(echo \"$input\" | jq -r '.model.id'); cwd=$(echo \"$input\" | jq -r '.workspace.current_dir'); transcript=$(echo \"$input\" | jq -r '.transcript_path'); cost=$(echo \"$input\" | jq -r '.cost.total_cost_usd // 0'); git_branch=$(cd \"$cwd\" 2>/dev/null && git branch --show-current 2>/dev/null || echo ''); case \"$model_id\" in *haiku*) window=200000 ;; *) window=1000000 ;; esac; used=$(tail -r \"$transcript\" 2>/dev/null | jq -rc 'select(.message.usage and (.isSidechain != true)) | .message.usage | (.input_tokens + (.cache_read_input_tokens // 0) + (.cache_creation_input_tokens // 0))' 2>/dev/null | head -1); used=${used:-0}; pct=$(( used * 100 / window )); cost_fmt=$(printf '$%.2f' \"$cost\"); dir=$(basename \"$cwd\"); if [ -n \"$git_branch\" ]; then printf \"%s in %s on %s    %s    %d%%\" \"$model\" \"$dir\" \"$git_branch\" \"$cost_fmt\" \"$pct\"; else printf \"%s in %s    %s    %d%%\" \"$model\" \"$dir\" \"$cost_fmt\" \"$pct\"; fi"
   },
   "enabledPlugins": {
     "superpowers@superpowers-marketplace": true
