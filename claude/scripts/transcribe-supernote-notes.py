@@ -13,7 +13,8 @@
 The Supernote tablet syncs its notes to Google Drive, and Google Drive for
 Desktop mirrors that folder to a local path on this Mac. This script walks that
 local folder, turns each new or updated note into Markdown, and drops it in the
-vault's Daily/ folder. It is the automated half of the `daily` skill's step 5.
+vault's Daily/ folder. It is the engine behind the `process-supernote` skill,
+which the `daily` skill also invokes as its step 5.
 
 Pipeline:
   <name>.note            --supernotelib--> temp <name>.pdf --notedmd--> body
