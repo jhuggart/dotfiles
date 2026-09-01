@@ -15,8 +15,8 @@ digraph daily {
     "1. Get today's calendar" -> "2. Get Things Today tasks";
     "2. Get Things Today tasks" -> "3. Check Things Inbox";
     "3. Check Things Inbox" -> "4. Escape Collective feed";
-    "4. Escape Collective feed" -> "5. Transcribe Supernote notes";
-    "5. Transcribe Supernote notes" -> "6. Capture Supernote TODOs";
+    "4. Escape Collective feed" -> "5. Process Supernote notes";
+    "5. Process Supernote notes" -> "6. Capture Supernote TODOs";
     "6. Capture Supernote TODOs" -> "7. Summarize & prompt";
     "7. Summarize & prompt" -> "8. Create & publish daily note";
 }
@@ -28,8 +28,8 @@ digraph daily {
 2. **Things Today** - Get critical work tasks using `mcp__things__get_today`
 3. **Things Inbox** - Surface items needing triage using `mcp__things__get_inbox`
 4. **Escape Collective** - Read RSS feed URL from `~/.claude/secrets/escape-collective-rss-url`. If the file is missing or empty, prompt the user to create it (single line containing their personal feed URL) and skip this step. Otherwise fetch the feed with `curl` (the member feed returns HTTP 403 to WebFetch's crawler, so use `curl -s -A 'Mozilla/5.0' "$(cat ~/.claude/secrets/escape-collective-rss-url)"` and parse the XML). In the on-screen summary, show title, author, and a one-line summary per article. In the daily note, include title, author, a concise summary (a few sentences), and the full article URL as visible text so it can be opened from the tablet or Obsidian
-5. **Transcribe Supernote Notes** - Run `~/.claude/scripts/transcribe-supernote-notes.py` to turn new or updated Supernote notes (synced to the local Google Drive folder) into Markdown in `Daily/`. All notes sharing a date and folder are combined into one `YYYY-MM-DD-<folder>-notes.md` — `<folder>` is the note's parent folder, and each note becomes a `## HH:MM` section (its file name when no time is known) in chronological order. The date comes from the note's own date (the `.note`'s embedded FILE_ID, falling back to a `YYYYMMDD` stamp in the file name, then mtime) — *not* the file's mtime, which Google Drive sets to the sync time and can trail the real date by days. Each combined file is written with YAML frontmatter (`creation date` = earliest note's time, `tags: [[supernote]] <year>`, `source` = list of every note that fed it). The script renders `.note` files to PDF via `supernotelib`, then noted.md (`notedmd`, transcribing with Gemini) handles them; PNG/JPG exports are transcribed directly. Source PDFs are skipped (publish-to-supernote's published daily-note PDFs sync into this same tree, and re-transcribing those would round-trip notes already in the vault). A combined file is rebuilt whenever any of its notes is newer than the existing `.md` (re-transcribing every note in that day+folder); ones already up to date are skipped. Report which files were written and the notes that fed each (e.g. `Daily/2026-06-24-DevClarity-notes.md (from 20260624_090025.note, Todos.note)`), then still prompt the user about anything the tablet hasn't synced yet. If the script reports a missing config or `notedmd` isn't set up, relay its instructions (see README one-time setup)
-6. **Capture Supernote TODOs** - Scan each markdown file that was newly transcribed in step 5 for lines containing `#todo` or `TODO:` (case-insensitive match on the marker). For each matching line, strip the marker and any leading whitespace/punctuation to extract the task title, then add it to the Things inbox via `mcp__things__add_todo`. If no todos are found, note that. Report each captured item with the source note file and the task text sent to Things. (Scanning only newly-transcribed files prevents duplicate todos on subsequent daily runs.)
+5. **Process Supernote Notes** - Invoke the `process-supernote` skill. It turns new and updated Supernote notes into Markdown in `Daily/`, processing only what changed since the last run, and reports each combined file with the notes that fed it (e.g. `Daily/2026-06-24-DevClarity-notes.md (from 20260624_090025.note, Todos.note)`). Carry that list into step 6 and into the summary's Supernote Notes section. If the skill reports a missing config or that `notedmd` isn't set up, relay its instructions and move on. Then still prompt the user about anything the tablet hasn't synced yet
+6. **Capture Supernote TODOs** - Scan each markdown file the `process-supernote` skill reported as transcribed in step 5 (its `Transcribed:` list — not files it reported as already up to date) for lines containing `#todo` or `TODO:` (case-insensitive match on the marker). For each matching line, strip the marker and any leading whitespace/punctuation to extract the task title, then add it to the Things inbox via `mcp__things__add_todo`. If no todos are found, note that. Report each captured item with the source note file and the task text sent to Things. (Scanning only newly-transcribed files prevents duplicate todos on subsequent daily runs.)
 7. **Summarize** - Present overview and offer to create daily note
 8. **Publish** - After the daily note is created, automatically publish it to the Supernote tablet (no prompt)
 
@@ -110,17 +110,11 @@ the token is rejected, the script prints what to do; relay it to the user.
   - Parse XML to extract recent article titles, authors (`dc:creator`), summaries, and links
   - Show articles not older than 3 days
   - In the daily note, render each article as title + author, a concise summary, and the article URL shown as visible text (e.g. `Read: https://escapecollective.com/...`) so the link stays reachable from the Supernote PDF
-- `~/.claude/scripts/transcribe-supernote-notes.py` - transcribe new Supernote notes into `Daily/` Markdown:
-  - Reads the local Supernote folder path from `~/.claude/secrets/supernote-notes-dir` (a single line; the Google Drive for Desktop path the tablet syncs to)
-  - If that file is missing or empty, relay the script's message: "Create `~/.claude/secrets/supernote-notes-dir` with the local Supernote folder path (chmod 600), then re-run." Skip this step for now.
-  - Renders `.note` files to PDF via `supernotelib`, then runs `notedmd convert` (noted.md, transcribing with Gemini) to produce Markdown; PNG/JPG are transcribed directly. Source PDFs are skipped (they include publish-to-supernote's round-tripped daily-note PDFs)
-  - Combines all notes sharing a date and folder into one `Daily/YYYY-MM-DD-<folder>-notes.md`, each as a `## HH:MM` section (file name when no time is known) in chronological order. The date is the note's own date — the `.note`'s embedded FILE_ID, falling back to a `YYYYMMDD` stamp in the file name, then mtime — so it reflects when the note was written, not when Google Drive synced it
-  - Frontmatter: `creation date` (earliest note's time), `tags: [[supernote]] <year>`, `source` (list of every note that fed the file)
-  - Rebuilds a combined file when any of its notes is newer than the `.md` (re-transcribing every note in that day+folder); skips files already up to date. Writes atomically, so a failed run leaves any existing `.md` intact; if a single note fails its section gets an inline warning, and if every note in the file fails it's left untouched
-  - Paces notedmd's Gemini calls (~7s apart) and retries any that come back empty, to stay under the free-tier ~10-requests/minute limit that would otherwise silently drop notes past the tenth. A large first-time backfill therefore runs a few minutes; tune via `SUPERNOTE_MIN_CALL_INTERVAL` / `SUPERNOTE_MAX_RETRIES` / `SUPERNOTE_RETRY_BACKOFF`
-  - Requires a one-time `notedmd` setup (Homebrew install + `notedmd config`); see README. If the script reports `notedmd` is missing or unconfigured, relay its instructions
+- `process-supernote` skill - transcribes new and updated Supernote notes into `Daily/` Markdown:
+  - Invoke it rather than calling `transcribe-supernote-notes.py` directly; the skill owns the prerequisites, the failure messages to relay, and the output contract
+  - Processes only notes that changed since the last run, and reports each combined file with the notes that fed it — that list is what step 6 scans
 - `mcp__things__add_todo` - add a captured todo to the Things inbox:
-  - Called once per matching line found in step 7
+  - Called once per matching line found in step 6
   - Pass the extracted task text as the `title` parameter
   - No list/project needed — defaults to inbox
 - `~/.claude/scripts/publish-to-supernote.py` - publish the daily note to the Supernote tablet:
