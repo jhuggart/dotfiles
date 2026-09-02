@@ -102,7 +102,8 @@ takes several minutes. Tune with `SUPERNOTE_MIN_CALL_INTERVAL`,
 | `missing ~/.claude/secrets/supernote-notes-dir` | Create it (`chmod 600`) with a single line: the local Google Drive for Desktop path to the tablet's notes folder, e.g. `~/Library/CloudStorage/GoogleDrive-you@example.com/My Drive/Supernote/Note` |
 | `notedmd is not installed` | Run `setup.sh` (`brew install notedmd`), then configure a provider once |
 | `source folder not found` | Google Drive for Desktop isn't running or isn't signed in — the mirrored folder is absent |
-| `destination folder not found` | The Obsidian vault `Daily/` folder is missing or iCloud hasn't synced it |
+| `destination folder not found` | The vault path is wrong for this machine. The error names where the path came from — create `~/.claude/secrets/obsidian-daily-dir` (`chmod 600`, single line) pointing at your vault's `Daily/` folder. `~/Library/Application Support/obsidian/obsidian.json` lists your vault paths |
+| `obsidian-daily-dir is empty` | Add the vault `Daily/` path to that file, or delete it to fall back to the default |
 | Every note fails to transcribe | Usually an unconfigured or rejected API key — check `notedmd config --show` |
 
 **notedmd provider setup** (one-time): `notedmd config --edit`, choose the
@@ -119,9 +120,14 @@ hardcodes the `gemma-3-27b-it` model, which the public Gemini API rejects with a
 ## Tools Used
 
 - `~/.claude/scripts/transcribe-supernote-notes.py` - the whole job; run with no
-  arguments. Reads the source folder from `~/.claude/secrets/supernote-notes-dir`,
-  writes to the vault's `Daily/`. Run via `uv`, which resolves `supernotelib`
-  itself. Optional positional overrides: `[source-dir] [dest-dir]`
+  arguments. Run via `uv`, which resolves `supernotelib` itself. Paths resolve as:
+  - **source** — `~/.claude/secrets/supernote-notes-dir` (required)
+  - **destination** — `~/.claude/secrets/obsidian-daily-dir` if it exists, else a
+    built-in default. Obsidian keeps an iCloud vault under either its own
+    container (`iCloud~md~obsidian`) or generic iCloud Drive
+    (`com~apple~CloudDocs`) depending on how the vault was made, so the default is
+    only a guess — set the secret on any machine where it guesses wrong
+  - Optional positional overrides win over both: `[source-dir] [dest-dir]`
 
 ## Related
 

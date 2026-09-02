@@ -65,8 +65,11 @@ Usage:
   transcribe-supernote-notes.py [source-dir] [dest-dir]
 
 `source-dir` defaults to the single-line path in
-~/.claude/secrets/supernote-notes-dir; `dest-dir` defaults to the vault Daily/
-folder. uv resolves supernotelib (and its Pillow dependency) automatically.
+~/.claude/secrets/supernote-notes-dir. `dest-dir` defaults to the single-line
+path in ~/.claude/secrets/obsidian-daily-dir, falling back to DEFAULT_DEST when
+that file is absent — the vault lives in a different iCloud container depending
+on how Obsidian was set up on a given Mac, so neither path is safe to hardcode.
+uv resolves supernotelib (and its Pillow dependency) automatically.
 """
 import os
 import re
@@ -82,6 +85,11 @@ import supernotelib as sn
 from supernotelib.converter import ImageConverter
 
 SOURCE_DIR_FILE = Path.home() / ".claude" / "secrets" / "supernote-notes-dir"
+DEST_DIR_FILE = Path.home() / ".claude" / "secrets" / "obsidian-daily-dir"
+# Used only when DEST_DIR_FILE is absent. Obsidian stores an iCloud vault under
+# either its own container (iCloud~md~obsidian) or generic iCloud Drive
+# (com~apple~CloudDocs) depending on how the vault was created, so this is a
+# best guess — set the secrets file on any machine where it guesses wrong.
 DEFAULT_DEST = Path.home() / "Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/Daily"
 NOTE_EXT = ".note"
 # Source images handed straight to notedmd. PDFs are intentionally excluded:
@@ -211,6 +219,22 @@ def read_source_dir() -> Path:
     die(f"{SOURCE_DIR_FILE} is empty — add the Supernote folder path.")
 
 
+def read_dest_dir() -> Path:
+    """Resolve the vault's Daily/ folder: secrets file if present, else the default.
+
+    Unlike the source dir, a missing file is not fatal — DEFAULT_DEST is right on
+    a machine whose vault lives in Obsidian's own iCloud container, and only the
+    machines where it isn't need the override.
+    """
+    if not DEST_DIR_FILE.is_file():
+        return DEFAULT_DEST
+    for line in DEST_DIR_FILE.read_text().splitlines():
+        line = line.strip()
+        if line and not line.startswith("#"):
+            return Path(line).expanduser()
+    die(f"{DEST_DIR_FILE} is empty — add the vault Daily/ path, or delete the file.")
+
+
 def note_to_pdf(note_path: Path, pdf_path: Path) -> None:
     """Render every page of a .note file into a single multi-page PDF.
 
@@ -316,12 +340,24 @@ def main() -> None:
         die("usage: transcribe-supernote-notes.py [source-dir] [dest-dir]")
 
     source_dir = Path(sys.argv[1]).expanduser() if len(sys.argv) >= 2 else read_source_dir()
-    dest_dir = Path(sys.argv[2]).expanduser() if len(sys.argv) == 3 else DEFAULT_DEST
+    dest_dir = Path(sys.argv[2]).expanduser() if len(sys.argv) == 3 else read_dest_dir()
 
     if not source_dir.is_dir():
         die(f"source folder not found: {source_dir}")
     if not dest_dir.is_dir():
-        die(f"destination folder not found: {dest_dir}")
+        origin = (
+            f"from {DEST_DIR_FILE}"
+            if DEST_DIR_FILE.is_file()
+            else f"the built-in default; {DEST_DIR_FILE} does not exist"
+        )
+        die(
+            f"destination folder not found: {dest_dir}\n"
+            f"That path came from {origin}.\n"
+            "Point it at your vault's Daily/ folder by creating that file (chmod 600)\n"
+            "with a single line, e.g.\n"
+            "  ~/Library/Mobile Documents/com~apple~CloudDocs/Obsidian/Daily\n"
+            "Obsidian's own obsidian.json lists your vault paths if you're unsure."
+        )
     if shutil.which("notedmd") is None:
         die(
             "notedmd is not installed — run setup.sh (brew install notedmd), then\n"
