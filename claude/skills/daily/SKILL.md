@@ -71,9 +71,10 @@ Ready to create daily note? (Daily/{date}.md)
 
 ## Daily Note
 
-If user confirms, create `Daily/YYYY-MM-DD.md` in the Obsidian vault
-(`$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian/Daily/`)
-following the Output Format structure, with the Escape Collective section
+If user confirms, create `Daily/YYYY-MM-DD.md` in the Obsidian vault. Read the
+vault's `Daily/` path from `~/.claude/secrets/obsidian-daily-dir` — don't assume
+an iCloud container, since Obsidian uses different ones depending on how the
+vault was created. Follow the Output Format structure, with the Escape Collective section
 expanded to a concise summary and visible article URL per item:
 - Frontmatter with date and tags
 - Meetings section pre-filled
