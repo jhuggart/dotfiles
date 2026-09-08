@@ -151,11 +151,21 @@ link_file "$DOTFILES_DIR/claude/global-CLAUDE.md" ~/.claude/CLAUDE.md
 # claude code keybindings (symlink — no runtime state, unlike settings.json)
 link_file "$DOTFILES_DIR/claude/keybindings.json" ~/.claude/keybindings.json
 
-# claude code skills
-mkdir -p ~/.claude/skills
-for skill_dir in "$DOTFILES_DIR/claude/skills"/*/; do
-  [ -d "$skill_dir" ] && link_file "${skill_dir%/}" ~/.claude/skills/"$(basename "$skill_dir")"
-done
+# claude code skills — now distributed as a private plugin marketplace, not
+# symlinked from here. Clean up symlinks left by earlier dotfiles versions so a
+# stale link can't shadow the installed plugin, then point at the marketplace.
+if [[ -d ~/.claude/skills ]]; then
+  for old_skill in ~/.claude/skills/*; do
+    [ -L "$old_skill" ] || continue
+    case "$(readlink "$old_skill")" in
+      "$DOTFILES_DIR"/claude/skills/*) rm -f "$old_skill" ;;
+    esac
+  done
+fi
+if ! claude plugin marketplace list 2>/dev/null | grep -q 'jhuggart/ai-skills'; then
+  echo "  skills: install with 'claude plugin marketplace add jhuggart/ai-skills'"
+  echo "          then 'claude plugin install ai-skills@ai-skills'"
+fi
 
 # Clean up old command symlinks from previous dotfiles versions
 if [[ -d ~/.claude/commands ]]; then

@@ -72,19 +72,22 @@ Prefix is `Ctrl+A` (not the default `Ctrl+B`).
 
 ### Claude Code
 
-**Skills:**
-| Skill | Action |
-|-------|--------|
-| `cp` | Commit and push |
-| `cps` | Commit, push, deploy to staging |
-| `cppr` | Commit, push, open PR, watch GitHub Actions |
-| `cpprs` | Commit, push, open PR, watch Actions, deploy to staging |
-| `merge` | Merge current branch's PR to main |
-| `daily` | Daily startup workflow |
-| `process-supernote` | Transcribe new/changed Supernote notes into Obsidian `Daily/` |
-| `organize-daily-notes` | File past months' daily notes into `Daily/YYYY/MM-Month` folders |
-| `setup-personal-proj` | Scaffold Cloudflare MCP permissions for a personal project |
-| `use-spark` | Query Spark Mail — emails, calendar, contacts, meetings |
+**Skills:** distributed separately as a private plugin marketplace,
+[jhuggart/ai-skills](https://github.com/jhuggart/ai-skills) — they used to live
+here under `claude/skills/` and be symlinked by `setup.sh`. Install with:
+
+```
+claude plugin marketplace add jhuggart/ai-skills
+claude plugin install ai-skills@ai-skills
+```
+
+`setup.sh` removes symlinks left by earlier versions of this repo, so a stale
+link can't shadow the installed plugin.
+
+Note the `daily` and `process-supernote` skills still depend on this repo: they
+call `claude/scripts/transcribe-supernote-notes.py` and `publish-to-supernote.py`
+through `~/.claude/scripts/`, which `setup.sh` symlinks. Installing the plugin
+alone won't make those two work.
 
 **Keybindings:**
 | Keys | Action |
