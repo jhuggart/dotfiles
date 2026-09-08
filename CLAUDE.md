@@ -18,7 +18,6 @@ dotfiles/
 ├── ghostty/config      # Ghostty terminal config
 ├── nvim/               # Neovim configuration
 ├── claude/
-│   ├── skills/         # Claude Code skills (auto-symlinked, one dir per skill)
 │   ├── scripts/        # Notification scripts for tmux highlighting
 │   └── settings.json   # Claude Code settings template
 └── setup.sh            # Installation script
@@ -26,7 +25,13 @@ dotfiles/
 
 ## Claude Code Skills
 
-Skills in `claude/skills/*/SKILL.md` are automatically symlinked to `~/.claude/skills/` by setup.sh.
+Skills are **not** in this repo. They live in the private marketplace
+[jhuggart/ai-skills](https://github.com/jhuggart/ai-skills) as a single
+`ai-skills` plugin, installed with `claude plugin install ai-skills@ai-skills`.
+
+`daily` and `process-supernote` still call this repo's `claude/scripts/*.py` by
+absolute path, so edits to those scripts belong here; edits to skill instructions
+belong in the marketplace repo.
 
 ## Tmux Window Highlighting
 
